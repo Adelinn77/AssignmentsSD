@@ -27,13 +27,13 @@ public class User {
     @Column(name = "last_name")
     private String lastName;
 
-    @Column(name = "email")
+    @Column(name = "email",unique = true)
     private String email;
 
     @Column(name = "phone")
     private String phone;
 
-    @Column(name = "username")
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
     @Column(name = "password")
@@ -41,6 +41,9 @@ public class User {
 
     @Column(name = "role")
     private Role role;
+
+    @Column(name = "access_restricted")
+    private boolean accessRestricted;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions = new ArrayList<>();
