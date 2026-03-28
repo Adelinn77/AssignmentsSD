@@ -51,8 +51,11 @@ public class Question {
     )
     private List<Tag> tags = new ArrayList<>();
 
-    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Answer> answer = new ArrayList<>();
 
-    //a list of images attached to the questions, could be null
+    //a list of images attached to the question, could be null
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<QuestionImage> images = new ArrayList<>();
+
 }
