@@ -31,6 +31,11 @@ public class TagService {
     }
 
     public TagDTO saveTag(TagDTO tagDTO) {
+        Optional<Tag> existingTag = tagRepository.findByLabel(tagDTO.getLabel());
+        if (existingTag.isPresent()) {
+            throw new IllegalArgumentException("Tag with label '" + tagDTO.getLabel() + "' already exists.");
+        }
+
         Tag newTag = mapDTOToEntity(tagDTO);
         tagRepository.save(newTag);
         return mapEntityToDTO(newTag);
@@ -40,8 +45,9 @@ public class TagService {
         if(tagRepository.existsById(id)) {
             Tag tag = tagRepository.findById(id).get();
             return mapEntityToDTO(tag);
-        } else {
-            throw new IllegalArgumentException("Tag with id " + id + " does not exist");
+        }
+        else {
+            throw new IllegalArgumentException("Tag with id " + id + " does not exist.");
         }
     }
 
@@ -52,20 +58,27 @@ public class TagService {
     }
 
     public TagDTO updateTag(TagDTO updatedTag) {
-        Tag tag = mapDTOToEntity(updatedTag);
-        if(tagRepository.existsById(tag.getId())) {
+        if(tagRepository.existsById(updatedTag.getId())) {
+            Optional<Tag> existingTag = tagRepository.findByLabel(updatedTag.getLabel());
+            if (existingTag.isPresent() && !existingTag.get().getId().equals(updatedTag.getId())) {
+                throw new IllegalArgumentException("Tag with label '" + updatedTag.getLabel() + "' already exists.");
+            }
+
+            Tag tag = mapDTOToEntity(updatedTag);
             Tag savedTag = tagRepository.save(tag);
             return mapEntityToDTO(savedTag);
-        } else {
-            throw new IllegalArgumentException("Tag with id:" + updatedTag.getId() + " not found.");
+        }
+        else {
+            throw new IllegalArgumentException("Tag with id: " + updatedTag.getId() + " not found.");
         }
     }
 
     public void deleteTagById(Long id) {
         if(tagRepository.existsById(id)){
             tagRepository.deleteById(id);
-        } else {
-            throw new IllegalArgumentException("Tag with id:" + id + " does not exist.");
+        }
+        else  {
+            throw new IllegalArgumentException("Tag with id: " + id + " does not exist.");
         }
     }
 
