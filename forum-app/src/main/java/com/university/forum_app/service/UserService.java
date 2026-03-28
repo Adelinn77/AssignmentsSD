@@ -69,8 +69,13 @@ public class UserService {
             user = userRepository.findByUsername(updatedUser.getUsername());
         }
         catch (Exception e) {
-            throw new IllegalArgumentException("User with username " + updatedUser.getUsername() + " does not exist");
+            throw new IllegalArgumentException("User with username " + updatedUser.getUsername() + " does not exist.");
         }
+        if(!updatedUser.getUsername().equals(user.getUsername()) && userRepository.existsByUsername(updatedUser.getUsername())) {
+            throw new IllegalArgumentException("User with username " + updatedUser.getUsername() + " already exists.");
+        }
+
+        user.setUsername(updatedUser.getUsername());
         user.setEmail(updatedUser.getEmail());
         user.setPhone(updatedUser.getPhone());
         user.setFirstName(updatedUser.getFirstName());

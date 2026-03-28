@@ -15,7 +15,6 @@ import java.util.List;
 @Builder
 public class QuestionDTO {
 
-    private Long id;
     private String title;
     private String text;
     private LocalDateTime date;
