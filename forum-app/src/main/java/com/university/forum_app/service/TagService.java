@@ -5,10 +5,10 @@ import com.university.forum_app.entity.Tag;
 import com.university.forum_app.repository.TagRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TagService {
@@ -17,22 +17,23 @@ public class TagService {
     private TagRepository tagRepository;
 
     private TagDTO mapEntityToDTO(Tag tag) {
-        TagDTO tagDTO = new TagDTO();
-        tagDTO.setId(tag.getId());
-        tagDTO.setLabel(tag.getLabel());
-        return tagDTO;
+        return TagDTO.builder()
+                .id(tag.getId())
+                .label(tag.getLabel())
+                .build();
     }
 
     private Tag mapDTOToEntity(TagDTO tagDTO) {
-        Tag tag = new Tag();
-        tag.setId(tagDTO.getId());
-        tag.setLabel(tagDTO.getLabel());
-        return tag;
+        return Tag.builder()
+                .id(tagDTO.getId())
+                .label(tagDTO.getLabel())
+                .build();
     }
 
+    @Transactional
     public TagDTO saveTag(TagDTO tagDTO) {
-        Optional<Tag> existingTag = tagRepository.findByLabel(tagDTO.getLabel());
-        if (existingTag.isPresent()) {
+        Tag existingTag = tagRepository.findTagByLabel(tagDTO.getLabel());
+        if (existingTag != null) {
             throw new IllegalArgumentException("Tag with label '" + tagDTO.getLabel() + "' already exists.");
         }
 
@@ -41,57 +42,61 @@ public class TagService {
         return mapEntityToDTO(newTag);
     }
 
+    @Transactional(readOnly = true)
     public TagDTO findTagById(Long id) {
-        if(tagRepository.existsById(id)) {
-            Tag tag = tagRepository.findById(id).get();
+        Tag tag = tagRepository.findById(id).orElse(null);
+        if (tag != null) {
             return mapEntityToDTO(tag);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Tag with id " + id + " does not exist.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<TagDTO> findAllTags() {
         List<Tag> tags = new ArrayList<>();
         tagRepository.findAll().forEach(tags::add);
         return tags.stream().map(this::mapEntityToDTO).toList();
     }
 
+    @Transactional
     public TagDTO updateTag(TagDTO updatedTag) {
-        if(tagRepository.existsById(updatedTag.getId())) {
-            Optional<Tag> existingTag = tagRepository.findByLabel(updatedTag.getLabel());
-            if (existingTag.isPresent() && !existingTag.get().getId().equals(updatedTag.getId())) {
+        if (tagRepository.existsById(updatedTag.getId())) {
+            Tag existingTag = tagRepository.findTagByLabel(updatedTag.getLabel());
+            if (existingTag != null && !existingTag.getId().equals(updatedTag.getId())) {
                 throw new IllegalArgumentException("Tag with label '" + updatedTag.getLabel() + "' already exists.");
             }
 
             Tag tag = mapDTOToEntity(updatedTag);
             Tag savedTag = tagRepository.save(tag);
             return mapEntityToDTO(savedTag);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Tag with id: " + updatedTag.getId() + " not found.");
         }
     }
 
+    @Transactional
     public void deleteTagById(Long id) {
-        if(tagRepository.existsById(id)){
+        if (tagRepository.existsById(id)) {
             tagRepository.deleteById(id);
-        }
-        else  {
+        } else {
             throw new IllegalArgumentException("Tag with id: " + id + " does not exist.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<TagDTO> getTagsByQuestionId(Long questionId) {
-        List<Tag> tags = tagRepository.findByQuestionsId(questionId);
+        List<Tag> tags = tagRepository.findTagByQuestionsId(questionId);
         return tags.stream().map(this::mapEntityToDTO).toList();
     }
 
+    @Transactional(readOnly = true)
     public TagDTO findTagByLabel(String label) {
-        Optional<Tag> tagOptional = tagRepository.findByLabel(label);
-        if(tagOptional.isPresent()) {
-            return mapEntityToDTO(tagOptional.get());
+        Tag tag = tagRepository.findTagByLabel(label);
+        if (tag == null) {
+            throw new IllegalArgumentException("No tag exists with this title: '" + label + "'.");
         }
-        return null;
+        return mapEntityToDTO(tag);
     }
+
 }
