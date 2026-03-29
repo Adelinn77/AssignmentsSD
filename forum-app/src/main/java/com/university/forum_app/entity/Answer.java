@@ -9,6 +9,8 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name="answers")
@@ -36,4 +38,7 @@ public class Answer {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
+
+    @OneToMany(mappedBy = "answer", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AnswerImage> images;
 }
