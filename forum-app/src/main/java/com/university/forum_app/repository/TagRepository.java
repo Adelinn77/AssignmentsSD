@@ -10,6 +10,5 @@ import java.util.Optional;
 @Repository
 public interface TagRepository extends CrudRepository<Tag, Long> {
 
-    Optional<Tag> findByLabel(String label);
-    List<Tag> findByQuestionsId(Long questionId);
+    Tag findTagByLabel(String tagLabel);
 }
