@@ -16,4 +16,7 @@ public class UserDTO {
     private String phone;
     private String firstName;
     private String lastName;
+
+    public void setId(Long id) {
+    }
 }
