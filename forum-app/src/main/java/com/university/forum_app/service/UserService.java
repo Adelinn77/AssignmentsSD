@@ -102,4 +102,22 @@ public class UserService {
         return userDTOs;
     }
 
+    public void deleteUserById(Long id) {
+    }
+
+    public UserDTO findUserByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found with email: " + email);
+        }
+        return mapEntityToDTO(user);
+    }
+    public UserDTO findUserById(Long id) {
+        Optional<User> optionalUser = userRepository.findById(id);
+        if (optionalUser.isPresent()) {
+            return mapEntityToDTO(optionalUser.get());
+        } else {
+            throw new IllegalArgumentException("User with id " + id + " does not exist.");
+        }
+    }
 }
