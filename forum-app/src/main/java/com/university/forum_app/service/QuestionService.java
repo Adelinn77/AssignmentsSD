@@ -92,7 +92,7 @@ public class QuestionService {
 
             Files.copy(file.getInputStream(), filePath);
 
-            return "/images/questions/" + uniqueFilename;
+            return uniqueFilename;
 
         } catch (IOException e) {
             throw new RuntimeException("Couldn't save image: " + e.getMessage());

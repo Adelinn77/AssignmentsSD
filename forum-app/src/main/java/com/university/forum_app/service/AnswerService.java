@@ -70,7 +70,7 @@ public class AnswerService {
 
             Files.copy(file.getInputStream(), filePath);
 
-            return "/images/answers/" + uniqueFilename;
+            return uniqueFilename;
 
         } catch (IOException e) {
             throw new RuntimeException("Couldn't save image: " + e.getMessage());
