@@ -1,0 +1,16 @@
+$kind: http-request
+url: http://localhost:8080/api/questions/title/Spring_Boot_Question
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "title": "Spring_Boot_Question_Updated",
+      "text": "Updatat cu succes.",
+      "authorName": "johndoe",
+      "tags": ["java", "spring"],
+      "status": "RESOLVED"
+    }
+order: 6000

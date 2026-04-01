@@ -1,0 +1,27 @@
+$kind: http-request
+name: Create Question 3 (Image)
+url: http://localhost:8080/api/questions/with-images
+method: POST
+body:
+  type: formdata
+  content:
+    - type: text
+      key: question
+      value: |-
+        {
+            "title": "eroare css",
+            "text": "Cum pot rezolva urmatoarea eroare?",
+            "date": "2026-03-31T12:12:00",
+            "status": "RECEIVED",
+            "authorName": "bobbrown",
+            "tags": ["css", "web"],
+            "imageUrls": [],
+            "answerCount": 0
+        }
+      contentType: application/json
+      disabled: false
+    - type: file
+      key: images
+      src: []
+      disabled: false
+order: 3000

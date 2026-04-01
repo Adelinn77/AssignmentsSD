@@ -1,0 +1,8 @@
+$kind: http-request
+name: Create Tag
+url: http://localhost:8080/api/tags
+method: POST
+body:
+  type: json
+  content: "{\r\n    \"label\": \"linux\"\r\n}"
+order: 1775085855737

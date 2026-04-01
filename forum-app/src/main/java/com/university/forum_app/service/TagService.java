@@ -99,4 +99,6 @@ public class TagService {
         return mapEntityToDTO(tag);
     }
 
+    public void deleteTagByLabel(String label) {
+    }
 }
