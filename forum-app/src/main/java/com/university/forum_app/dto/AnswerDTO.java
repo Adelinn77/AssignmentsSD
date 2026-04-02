@@ -16,6 +16,7 @@ public class AnswerDTO {
     private Long answerId;
     private Long questionId;
     private Long userId;
+    private String text;
     private LocalDateTime dateTime;
     private List<String> imageUrls;
 }

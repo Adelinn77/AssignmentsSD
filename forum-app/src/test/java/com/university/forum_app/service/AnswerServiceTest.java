@@ -43,19 +43,20 @@ public class AnswerServiceTest {
                 .author(testUser)
                 .question(testQuestion)
                 .date(LocalDateTime.now())
-                .text("Acesta este un mock answer")
+                .text("This is a mock answer")
                 .build();
 
         mockAnswerDTO = AnswerDTO.builder()
                 .answerId(100L)
                 .userId(2L)
                 .questionId(1L)
+                .text("This is a mock answer")
                 .dateTime(LocalDateTime.now())
                 .build();
     }
 
     @Test
-    void testSaveAnswer_Success() {
+    void testSaveAnswerSuccess() {
         when(answerRepository.save(any(Answer.class))).thenReturn(mockAnswer);
 
         AnswerDTO result = answerService.saveAnswer(mockAnswerDTO);
@@ -67,7 +68,7 @@ public class AnswerServiceTest {
     }
 
     @Test
-    void testFindAnswerById_Success() {
+    void testFindAnswerByIdSuccess() {
         when(answerRepository.findById(100L)).thenReturn(Optional.of(mockAnswer));
 
         AnswerDTO result = answerService.findAnswerById(100L);
@@ -77,7 +78,7 @@ public class AnswerServiceTest {
     }
 
     @Test
-    void testFindAnswerById_ThrowsException() {
+    void testFindAnswerByIdThrowsException() {
         when(answerRepository.findById(999L)).thenReturn(Optional.empty());
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {

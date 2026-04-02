@@ -44,7 +44,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void testCreateUser_Success() throws Exception {
+    void testCreateUserSuccess() throws Exception {
         when(userService.saveUser(any(UserDTO.class))).thenReturn(mockUserDTO);
 
         mockMvc.perform(post("/api/users")
@@ -56,7 +56,7 @@ public class UserControllerTest {
     }
 
     @Test
-    void testCreateUser_Conflict() throws Exception {
+    void testCreateUserConflict() throws Exception {
         when(userService.saveUser(any(UserDTO.class)))
                 .thenThrow(new IllegalArgumentException("User with username johndoe already exists"));
 
@@ -78,10 +78,10 @@ public class UserControllerTest {
     }
 
     @Test
-    void testGetUserById_Success() throws Exception {
-        when(userService.findUserById(1L)).thenReturn(mockUserDTO);
+    void testGetUserByUsername_Success() throws Exception {
+        when(userService.findUserByUsername("johndoe")).thenReturn(mockUserDTO);
 
-        mockMvc.perform(get("/api/users/1"))
+        mockMvc.perform(get("/api/users/johndoe"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.username").value("johndoe"));
     }

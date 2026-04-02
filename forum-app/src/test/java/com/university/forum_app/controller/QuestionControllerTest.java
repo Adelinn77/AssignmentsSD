@@ -32,14 +32,14 @@ public class QuestionControllerTest {
     @MockBean
     private QuestionService questionService;
 
+    @Autowired
     private ObjectMapper objectMapper;
 
     private QuestionDTO mockQuestionDTO;
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
-        objectMapper.registerModule(new JavaTimeModule()); // Fix for LocalDateTime serialization
+        objectMapper.registerModule(new JavaTimeModule());
 
         mockQuestionDTO = QuestionDTO.builder()
                 .title("Spring Test")
@@ -52,7 +52,7 @@ public class QuestionControllerTest {
     }
 
     @Test
-    void testCreateQuestion_Success() throws Exception {
+    void testCreateQuestionSuccess() throws Exception {
         when(questionService.saveQuestion(any(QuestionDTO.class))).thenReturn(mockQuestionDTO);
 
         mockMvc.perform(post("/api/questions")
@@ -74,30 +74,31 @@ public class QuestionControllerTest {
     }
 
     @Test
-    void testGetQuestionByTitle_Success() throws Exception {
+    void testGetQuestionByTitleSuccess() throws Exception {
         when(questionService.findQuestionByTitle("Spring Test")).thenReturn(mockQuestionDTO);
 
-        mockMvc.perform(get("/api/questions/title/Spring Test"))
+        mockMvc.perform(get("/api/questions/title/{title}", "Spring Test"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Spring Test"));
     }
 
     @Test
     void testGetQuestionByTitle_NotFound() throws Exception {
+        String expectedErrorMessage = "No question exists with this title: 'Unknown'.";
         when(questionService.findQuestionByTitle("Unknown"))
-                .thenThrow(new IllegalArgumentException("No question exists with this title: 'Unknown'."));
-
-        mockMvc.perform(get("/api/questions/title/Unknown"))
-                .andExpect(status().isNotFound()); // As per your Controller mapping
+                .thenThrow(new IllegalArgumentException(expectedErrorMessage));
+        mockMvc.perform(get("/api/questions/title/{title}", "Unknown"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(expectedErrorMessage));
     }
 
     @Test
-    void testUpdateQuestion_Success() throws Exception {
+    void testUpdateQuestionSuccess() throws Exception {
         when(questionService.updateQuestion(eq("Spring Test"), any(QuestionDTO.class))).thenReturn(mockQuestionDTO);
 
-        mockMvc.perform(put("/api/questions/title/Spring Test")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(mockQuestionDTO)))
+        mockMvc.perform(put("/api/questions/title/{currentTitle}", "Spring Test")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(mockQuestionDTO)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Spring Test"));
     }

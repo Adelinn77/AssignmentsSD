@@ -1,6 +1,6 @@
 package com.university.forum_app;
 
-import com.university.forum_app.dto.QuestionDTO;
+import    com.university.forum_app.dto.QuestionDTO;
 import com.university.forum_app.dto.UserDTO;
 import com.university.forum_app.entity.Question;
 import com.university.forum_app.entity.User;

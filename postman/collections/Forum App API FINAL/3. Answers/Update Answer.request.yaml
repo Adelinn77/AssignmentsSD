@@ -2,19 +2,15 @@ $kind: http-request
 name: Update Answer
 url: http://localhost:8080/api/answers/1
 method: PUT
+headers:
+  Content-Type: application/json
 body:
-  type: json
-  content: "{\r
-
-    \    \"answerId\": 2,\r
-
-    \    \"questionId\": 2,\r
-
-    \    \"userId\": 2,\r
-
-    \    \"dateTime\": \"2026-03-31T19:15:00\",\r
-
-    \    \"imageUrls\": [\"\"]\r
-
-    }"
+  type: text
+  content: |-
+    {
+      "answerId": 2,
+      "text": "This is the updated text of my answer.",
+      "questionId": 2,
+      "userId": 5
+    }
 order: 4458146892137793

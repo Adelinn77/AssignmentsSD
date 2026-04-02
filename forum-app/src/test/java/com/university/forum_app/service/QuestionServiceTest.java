@@ -66,7 +66,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void testSaveQuestion_Success() {
+    void testSaveQuestionSuccess() {
         when(questionRepository.existsByTitle(mockQuestionDTO.getTitle())).thenReturn(false);
         when(userRepository.findByUsername(mockQuestionDTO.getAuthorName())).thenReturn(mockUser);
         when(tagRepository.findTagByLabel("java")).thenReturn(null); // Tag doesn't exist, will create
@@ -80,7 +80,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void testSaveQuestion_ThrowsException_WhenTitleExists() {
+    void testSaveQuestionThrowsExceptionWhenTitleExists() {
         when(questionRepository.existsByTitle(mockQuestionDTO.getTitle())).thenReturn(true);
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
@@ -92,7 +92,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void testFindQuestionByTitle_Success() {
+    void testFindQuestionByTitleSuccess() {
         when(questionRepository.findByTitle("Spring Boot Test")).thenReturn(mockQuestion);
 
         QuestionDTO result = questionService.findQuestionByTitle("Spring Boot Test");
@@ -102,7 +102,7 @@ public class QuestionServiceTest {
     }
 
     @Test
-    void testDeleteQuestion_Success() {
+    void testDeleteQuestionSuccess() {
         when(questionRepository.existsByTitle("Spring Boot Test")).thenReturn(true);
 
         assertDoesNotThrow(() -> questionService.deleteQuestionByTitle("Spring Boot Test"));
@@ -117,5 +117,16 @@ public class QuestionServiceTest {
 
         assertEquals(1, result.size());
         assertEquals("Spring Boot Test", result.get(0).getTitle());
+    }
+
+    @Test
+    void testFindQuestionByTitle_NotFound_ThrowsException() {
+        when(questionRepository.findByTitle("Titlu Inexistent")).thenReturn(null);
+
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            questionService.findQuestionByTitle("Titlu Inexistent");
+        });
+
+        assertTrue(exception.getMessage().contains("No question exists with this title: 'Titlu Inexistent'."));
     }
 }

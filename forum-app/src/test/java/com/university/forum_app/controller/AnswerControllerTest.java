@@ -30,13 +30,13 @@ public class AnswerControllerTest {
     @MockBean
     private AnswerService answerService;
 
+    @Autowired
     private ObjectMapper objectMapper;
 
     private AnswerDTO mockAnswerDTO;
 
     @BeforeEach
     void setUp() {
-        objectMapper = new ObjectMapper();
         objectMapper.registerModule(new JavaTimeModule());
 
         mockAnswerDTO = AnswerDTO.builder()

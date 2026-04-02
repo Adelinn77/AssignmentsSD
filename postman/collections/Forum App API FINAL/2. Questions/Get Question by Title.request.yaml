@@ -1,4 +1,4 @@
 $kind: http-request
-url: http://localhost:8080/api/questions/title/Spring_Boot_Question
+url: http://localhost:8080/api/questions/title/React_vs_Angular
 method: GET
 order: 5000

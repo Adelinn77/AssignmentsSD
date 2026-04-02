@@ -50,6 +50,35 @@ public class QuestionService {
                 .build();
     }
 
+    private Question mapDTOToEntity(QuestionDTO questionDTO) {
+        User author = userRepository.findByUsername(questionDTO.getAuthorName());
+
+        if (author == null && questionDTO.getAuthorName() != null) {
+            throw new IllegalArgumentException("Author with username '" + questionDTO.getAuthorName() + "' doesn't exist.");
+        }
+
+        List<Tag> questionTags = new ArrayList<>();
+        if (questionDTO.getTags() != null) {
+            for (String tagLabel : questionDTO.getTags()) {
+                Tag existingTag = tagRepository.findTagByLabel(tagLabel);
+                if (existingTag != null) {
+                    questionTags.add(existingTag);
+                } else {
+                    questionTags.add(Tag.builder().label(tagLabel).build());
+                }
+            }
+        }
+
+        return Question.builder()
+                .title(questionDTO.getTitle())
+                .text(questionDTO.getText())
+                .date(questionDTO.getDate())
+                .status(questionDTO.getStatus())
+                .author(author)
+                .tags(questionTags)
+                .build();
+    }
+
     @Transactional
     public QuestionDTO saveQuestionWithImages(QuestionDTO questionDTO, List<MultipartFile> imageFiles) {
         if(questionRepository.existsByTitle(questionDTO.getTitle())) {
@@ -79,55 +108,10 @@ public class QuestionService {
         return mapEntityToDTO(newQuestion);
     }
 
-
-    private String saveImageToDisk(MultipartFile file) {
-        try {
-            Path uploadPath = Paths.get(uploadDir);
-            if (!Files.exists(uploadPath)) {
-                Files.createDirectories(uploadPath);
-            }
-
-            String uniqueFilename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            Path filePath = uploadPath.resolve(uniqueFilename);
-
-            Files.copy(file.getInputStream(), filePath);
-
-            return uniqueFilename;
-
-        } catch (IOException e) {
-            throw new RuntimeException("Couldn't save image: " + e.getMessage());
-        }
-    }
-
-    private Question mapDTOToEntity(QuestionDTO questionDTO) {
-        User author = userRepository.findByUsername(questionDTO.getAuthorName());
-
-        List<Tag> questionTags = new ArrayList<>();
-        if (questionDTO.getTags() != null) {
-            for (String tagLabel : questionDTO.getTags()) {
-                Tag existingTag = tagRepository.findTagByLabel(tagLabel);
-                if (existingTag != null) {
-                    questionTags.add(existingTag);
-                } else {
-                    questionTags.add(Tag.builder().label(tagLabel).build());
-                }
-            }
-        }
-
-        return Question.builder()
-                .title(questionDTO.getTitle())
-                .text(questionDTO.getText())
-                .date(questionDTO.getDate())
-                .status(questionDTO.getStatus())
-                .author(author)
-                .tags(questionTags)
-                .build();
-    }
-
     @Transactional
     public QuestionDTO saveQuestion(QuestionDTO questionDTO) {
         if(questionRepository.existsByTitle(questionDTO.getTitle())) {
-            throw new IllegalArgumentException("This title '" + questionDTO.getTitle() + "'is already used by another question.");
+            throw new IllegalArgumentException("This title '" + questionDTO.getTitle() + "' is already used by another question.");
         }
 
         Question newQuestion = mapDTOToEntity(questionDTO);
@@ -137,11 +121,8 @@ public class QuestionService {
 
     @Transactional(readOnly = true)
     public QuestionDTO findQuestionByTitle(String title) {
-        Question question;
-        try {
-            question = questionRepository.findByTitle(title);
-        }
-        catch (Exception e) {
+        Question question = questionRepository.findByTitle(title);
+        if (question == null) {
             throw new IllegalArgumentException("No question exists with this title: '" + title + "'.");
         }
         return mapEntityToDTO(question);
@@ -149,11 +130,8 @@ public class QuestionService {
 
     @Transactional
     public QuestionDTO updateQuestion(String currentTitle, QuestionDTO updatedQuestion) {
-        Question question;
-        try {
-            question = questionRepository.findByTitle(currentTitle);
-        }
-        catch (Exception e) {
+        Question question = questionRepository.findByTitle(currentTitle);
+        if (question == null) {
             throw new IllegalArgumentException("No question exists with this title: '" + currentTitle + "'.");
         }
 
@@ -176,8 +154,7 @@ public class QuestionService {
     public void deleteQuestionByTitle(String title) {
         if(questionRepository.existsByTitle(title)){
             questionRepository.deleteByTitle(title);
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("No question exists with this title: '" + title + "'.");
         }
     }
@@ -189,5 +166,22 @@ public class QuestionService {
         return questions.stream().map(this::mapEntityToDTO).toList();
     }
 
+    private String saveImageToDisk(MultipartFile file) {
+        try {
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
 
+            String uniqueFilename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(uniqueFilename);
+
+            Files.copy(file.getInputStream(), filePath);
+
+            return uniqueFilename;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't save image: " + e.getMessage());
+        }
+    }
 }

@@ -17,9 +17,8 @@ public class QuestionController {
     @Autowired
     private QuestionService questionService;
 
-    // Crearea unei întrebări noi
     @PostMapping
-    public ResponseEntity<?> createQuestion(@RequestBody QuestionDTO questionDTO) {
+    public ResponseEntity<Object> createQuestion(@RequestBody QuestionDTO questionDTO) {
         try {
             QuestionDTO savedQuestion = questionService.saveQuestion(questionDTO);
             return new ResponseEntity<>(savedQuestion, HttpStatus.CREATED);
@@ -28,9 +27,8 @@ public class QuestionController {
         }
     }
 
-    // Crearea unei întrebări cu imagini
     @PostMapping("/with-images")
-    public ResponseEntity<?> createQuestionWithImages(
+    public ResponseEntity<Object> createQuestionWithImages(
             @RequestPart("question") QuestionDTO questionDTO,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles) {
         try {
@@ -41,16 +39,14 @@ public class QuestionController {
         }
     }
 
-    // Obținerea tuturor întrebărilor
     @GetMapping
     public ResponseEntity<List<QuestionDTO>> getAllQuestions() {
         List<QuestionDTO> questions = questionService.findAllQuestions();
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
-    // Obținerea unei întrebări după titlu
     @GetMapping("/title/{title}")
-    public ResponseEntity<?> getQuestionByTitle(@PathVariable String title) {
+    public ResponseEntity<Object> getQuestionByTitle(@PathVariable String title) {
         try {
             QuestionDTO question = questionService.findQuestionByTitle(title);
             return new ResponseEntity<>(question, HttpStatus.OK);
@@ -59,9 +55,8 @@ public class QuestionController {
         }
     }
 
-    // Actualizarea unei întrebări (după titlul curent)
     @PutMapping("/title/{currentTitle}")
-    public ResponseEntity<?> updateQuestion(
+    public ResponseEntity<Object> updateQuestion(
             @PathVariable String currentTitle,
             @RequestBody QuestionDTO questionDTO) {
         try {
@@ -72,9 +67,8 @@ public class QuestionController {
         }
     }
 
-    // Ștergerea unei întrebări după titlu
     @DeleteMapping("/title/{title}")
-    public ResponseEntity<?> deleteQuestionByTitle(@PathVariable String title) {
+    public ResponseEntity<String> deleteQuestionByTitle(@PathVariable String title) {
         try {
             questionService.deleteQuestionByTitle(title);
             return new ResponseEntity<>("Question with title '" + title + "' was deleted successfully.", HttpStatus.OK);

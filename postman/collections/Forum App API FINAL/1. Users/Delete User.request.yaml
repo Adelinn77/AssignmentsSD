@@ -1,5 +1,5 @@
 $kind: http-request
 name: Delete User
-url: http://localhost:8080/api/users/1
+url: http://localhost:8080/api/users/alicesmith
 method: DELETE
 order: 2414516937688895

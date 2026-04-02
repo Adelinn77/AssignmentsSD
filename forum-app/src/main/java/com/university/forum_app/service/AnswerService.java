@@ -111,22 +111,12 @@ public class AnswerService {
 
     @Transactional
     public AnswerDTO updateAnswer(AnswerDTO updatedAnswer) {
-        Answer answer;
-        try {
-            answer = answerRepo.findById(updatedAnswer.getAnswerId())
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "No answer exists with id: '" + updatedAnswer.getAnswerId() + "'."));
-        } catch (Exception e) {
-            throw new IllegalArgumentException(
-                    "No answer exists with id: '" + updatedAnswer.getAnswerId() + "'.");
-        }
+        Answer answer = answerRepo.findById(updatedAnswer.getAnswerId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No answer exists with id: '" + updatedAnswer.getAnswerId() + "'."));
 
         Answer mappedData = mapDTOToEntity(updatedAnswer);
-
-        answer.setAuthor(mappedData.getAuthor());
-        answer.setQuestion(mappedData.getQuestion());
-        answer.setDate(mappedData.getDate());
-
+        answer.setText(mappedData.getText());
         answerRepo.save(answer);
         return mapEntityToDTO(answer);
     }
@@ -142,14 +132,9 @@ public class AnswerService {
 
     @Transactional(readOnly = true)
     public AnswerDTO findAnswerById(Long id) {
-        Answer answer;
-        try {
-            answer = answerRepo.findById(id)
-                    .orElseThrow(() -> new IllegalArgumentException(
-                            "No answer exists with id: '" + id + "'."));
-        } catch (Exception e) {
-            throw new IllegalArgumentException("No answer exists with id: '" + id + "'.");
-        }
+        Answer answer = answerRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No answer exists with id: '" + id + "'."));
         return mapEntityToDTO(answer);
     }
 

@@ -8,6 +8,7 @@ body:
   content: |-
     {
       "questionId": 1,
-      "userId": 2
+      "userId": 2,
+      "text": "Answer for question with ID 1."
     }
 order: 1000

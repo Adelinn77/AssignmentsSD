@@ -1,5 +1,5 @@
 $kind: http-request
 name: Delete Answer
-url: ""
-method: GET
+url: http://localhost:8080/api/1
+method: DELETE
 order: 3863536487891369

@@ -50,36 +50,31 @@ public class UserService {
         return mapEntityToDTO(newUser);
     }
 
+    @Transactional(readOnly = true)
     public UserDTO findUserByUsername(String username) {
-        User user;
-        try {
-            user = userRepository.findByUsername(username);
+        // FIX: Verificare corectă cu null
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User with username '" + username + "' does not exist");
         }
-        catch (Exception e) {
-            throw new IllegalArgumentException("User with username " + username + " does not exist");
-        }
-        UserDTO userDTO =  mapEntityToDTO(user);
-        return userDTO;
+        return mapEntityToDTO(user);
     }
 
     @Transactional
     public UserDTO updateUser(UserDTO updatedUser) {
-        User user;
-        try {
-            user = userRepository.findByUsername(updatedUser.getUsername());
-        }
-        catch (Exception e) {
-            throw new IllegalArgumentException("User with username " + updatedUser.getUsername() + " does not exist.");
-        }
-        if(!updatedUser.getUsername().equals(user.getUsername()) && userRepository.existsByUsername(updatedUser.getUsername())) {
-            throw new IllegalArgumentException("User with username " + updatedUser.getUsername() + " already exists.");
+        // FIX: Verificare corectă cu null
+        User user = userRepository.findByUsername(updatedUser.getUsername());
+        if (user == null) {
+            throw new IllegalArgumentException("User with username '" + updatedUser.getUsername() + "' does not exist.");
         }
 
-        user.setUsername(updatedUser.getUsername());
+        // Am scos verificarea redundantă a username-ului.
+        // Actualizăm restul datelor:
         user.setEmail(updatedUser.getEmail());
         user.setPhone(updatedUser.getPhone());
         user.setFirstName(updatedUser.getFirstName());
         user.setLastName(updatedUser.getLastName());
+
         userRepository.save(user);
         return mapEntityToDTO(user);
     }
@@ -88,30 +83,28 @@ public class UserService {
     public void deleteUserByUsername(String username) {
         if(userRepository.existsByUsername(username)) {
             userRepository.deleteByUsername(username);
-        }
-        else  {
-            throw new IllegalArgumentException("User with username:" + username + " does not exist.");
+        } else {
+            throw new IllegalArgumentException("User with username '" + username + "' does not exist.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<UserDTO> findAllUsers() {
         List<User> users = new ArrayList<>();
         userRepository.findAll().forEach(users::add);
-        List<UserDTO> userDTOs = new ArrayList<>();
-        userDTOs = users.stream().map(this::mapEntityToDTO).toList();
-        return userDTOs;
+        return users.stream().map(this::mapEntityToDTO).toList();
     }
 
-    public void deleteUserById(Long id) {
-    }
-
+    @Transactional(readOnly = true)
     public UserDTO findUserByEmail(String email) {
         User user = userRepository.findByEmail(email);
         if (user == null) {
-            throw new IllegalArgumentException("User not found with email: " + email);
+            throw new IllegalArgumentException("User not found with email: '" + email + "'.");
         }
         return mapEntityToDTO(user);
     }
+
+    @Transactional(readOnly = true)
     public UserDTO findUserById(Long id) {
         Optional<User> optionalUser = userRepository.findById(id);
         if (optionalUser.isPresent()) {
