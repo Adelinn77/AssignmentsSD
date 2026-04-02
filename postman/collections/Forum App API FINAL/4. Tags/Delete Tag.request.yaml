@@ -1,0 +1,5 @@
+$kind: http-request
+name: Delete Tag
+url: http://localhost:8080/api/tags/label/jpa
+method: DELETE
+order: 2595653330501627

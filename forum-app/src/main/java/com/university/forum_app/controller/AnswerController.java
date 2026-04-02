@@ -17,9 +17,8 @@ public class AnswerController {
     @Autowired
     private AnswerService answerService;
 
-    // Crearea unui răspuns nou
     @PostMapping
-    public ResponseEntity<?> createAnswer(@RequestBody AnswerDTO answerDTO) {
+    public ResponseEntity<Object> createAnswer(@RequestBody AnswerDTO answerDTO) {
         try {
             AnswerDTO savedAnswer = answerService.saveAnswer(answerDTO);
             return new ResponseEntity<>(savedAnswer, HttpStatus.CREATED);
@@ -28,9 +27,8 @@ public class AnswerController {
         }
     }
 
-    // Crearea unui răspuns cu imagini
     @PostMapping("/with-images")
-    public ResponseEntity<?> createAnswerWithImages(
+    public ResponseEntity<Object> createAnswerWithImages(
             @RequestPart("answer") AnswerDTO answerDTO,
             @RequestPart(value = "images", required = false) List<MultipartFile> imageFiles) {
         try {
@@ -41,41 +39,37 @@ public class AnswerController {
         }
     }
 
-    // Obținerea tuturor răspunsurilor
     @GetMapping
     public ResponseEntity<List<AnswerDTO>> getAllAnswers() {
         List<AnswerDTO> answers = answerService.findAllAnswers();
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
-    // Obținerea unui răspuns după ID
     @GetMapping("/{id}")
-    public ResponseEntity<?> getAnswerById(@PathVariable Long id) {
+    public ResponseEntity<Object> getAnswerById(@PathVariable Long id) {
         try {
             AnswerDTO answer = answerService.findAnswerById(id);
             return new ResponseEntity<>(answer, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 404 e mai potrivit aici
         }
     }
 
-    // Obținerea răspunsurilor pentru o întrebare specifică
     @GetMapping("/question/{questionId}")
     public ResponseEntity<List<AnswerDTO>> getAnswersByQuestionId(@PathVariable Long questionId) {
         List<AnswerDTO> answers = answerService.findAnswersByQuestionId(questionId);
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
-    // Obținerea răspunsurilor unui utilizator
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<AnswerDTO>> getAnswersByUserId(@PathVariable Long userId) {
         List<AnswerDTO> answers = answerService.findAnswersByAuthorId(userId);
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
-    // Actualizarea unui răspuns
+
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateAnswer(@PathVariable Long id, @RequestBody AnswerDTO answerDTO) {
+    public ResponseEntity<Object> updateAnswer(@PathVariable Long id, @RequestBody AnswerDTO answerDTO) {
         try {
             answerDTO.setAnswerId(id);
             AnswerDTO updatedAnswer = answerService.updateAnswer(answerDTO);
@@ -85,9 +79,8 @@ public class AnswerController {
         }
     }
 
-    // stergerea unui răspuns
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteAnswer(@PathVariable Long id) {
+    public ResponseEntity<String> deleteAnswer(@PathVariable Long id) {
         try {
             answerService.deleteAnswerById(id);
             return new ResponseEntity<>("Answer with id " + id + " was deleted successfully.", HttpStatus.OK);

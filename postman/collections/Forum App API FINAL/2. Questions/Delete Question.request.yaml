@@ -1,0 +1,5 @@
+$kind: http-request
+name: Delete Question
+url: http://localhost:8080/api/questions/title/Spring_Boot_Question
+method: DELETE
+order: 253110154958366

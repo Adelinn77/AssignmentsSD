@@ -63,6 +63,8 @@ public class TagService {
     public TagDTO updateTag(TagDTO updatedTag) {
         if (tagRepository.existsById(updatedTag.getId())) {
             Tag existingTag = tagRepository.findTagByLabel(updatedTag.getLabel());
+
+            // Checking if the new label is already used by ANOTHER tag (different ID)
             if (existingTag != null && !existingTag.getId().equals(updatedTag.getId())) {
                 throw new IllegalArgumentException("Tag with label '" + updatedTag.getLabel() + "' already exists.");
             }
@@ -71,7 +73,7 @@ public class TagService {
             Tag savedTag = tagRepository.save(tag);
             return mapEntityToDTO(savedTag);
         } else {
-            throw new IllegalArgumentException("Tag with id: " + updatedTag.getId() + " not found.");
+            throw new IllegalArgumentException("Tag with id " + updatedTag.getId() + " not found.");
         }
     }
 
@@ -80,7 +82,7 @@ public class TagService {
         if (tagRepository.existsById(id)) {
             tagRepository.deleteById(id);
         } else {
-            throw new IllegalArgumentException("Tag with id: " + id + " does not exist.");
+            throw new IllegalArgumentException("Tag with id " + id + " does not exist.");
         }
     }
 
@@ -94,9 +96,18 @@ public class TagService {
     public TagDTO findTagByLabel(String label) {
         Tag tag = tagRepository.findTagByLabel(label);
         if (tag == null) {
-            throw new IllegalArgumentException("No tag exists with this title: '" + label + "'.");
+            throw new IllegalArgumentException("No tag exists with label: '" + label + "'.");
         }
         return mapEntityToDTO(tag);
     }
 
+    @Transactional
+    public void deleteTagByLabel(String label) {
+        Tag tag = tagRepository.findTagByLabel(label);
+        if (tag != null) {
+            tagRepository.delete(tag);
+        } else {
+            throw new IllegalArgumentException("Cannot delete. Tag with label '" + label + "' does not exist.");
+        }
+    }
 }

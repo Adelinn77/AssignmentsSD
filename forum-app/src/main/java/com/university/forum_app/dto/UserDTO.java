@@ -17,6 +17,4 @@ public class UserDTO {
     private String firstName;
     private String lastName;
 
-    public void setId(Long id) {
-    }
 }
