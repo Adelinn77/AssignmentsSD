@@ -45,6 +45,16 @@ public class QuestionController {
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
+    @GetMapping("/author/{username}")
+    public ResponseEntity<Object> getQuestionsByAuthor(@PathVariable String username) {
+        try {
+            List<QuestionDTO> questions = questionService.findQuestionsByAuthor(username);
+            return new ResponseEntity<>(questions, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
     @GetMapping("/title/{title}")
     public ResponseEntity<Object> getQuestionByTitle(@PathVariable String title) {
         try {

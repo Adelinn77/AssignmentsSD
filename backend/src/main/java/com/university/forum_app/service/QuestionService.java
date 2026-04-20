@@ -166,6 +166,20 @@ public class QuestionService {
         return questions.stream().map(this::mapEntityToDTO).toList();
     }
 
+    @Transactional(readOnly = true)
+    public List<QuestionDTO> findQuestionsByAuthor(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            throw new IllegalArgumentException("Username cannot be null or empty.");
+        }
+
+        if (!userRepository.existsByUsername(username)) {
+            throw new IllegalArgumentException("User with username '" + username + "' does not exist.");
+        }
+
+        List<Question> questions = questionRepository.findByAuthorUsername(username);
+        return questions.stream().map(this::mapEntityToDTO).toList();
+    }
+
     private String saveImageToDisk(MultipartFile file) {
         try {
             Path uploadPath = Paths.get(uploadDir);
