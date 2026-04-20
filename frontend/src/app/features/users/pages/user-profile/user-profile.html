@@ -1,1 +1,33 @@
-<p>user-profile works!</p>
+<div class="profile-container">
+  @if (isLoading()) {
+    <p>Loading profile data...</p>
+  }
+
+  @if (errorMessage()) {
+    <div class="error-msg">{{ errorMessage() }}</div>
+  }
+
+  @if (user(); as u) {
+    <div class="profile-header">
+      <h1>{{ u.firstName }} {{ u.lastName }}</h1>
+      <span class="username-tag">@{{ u.username }}</span>
+      <span class="score-badge">Reputation Score: 0</span>
+    </div>
+
+    <div class="contact-info">
+      <h3>Contact Information</h3>
+      <p>Email: {{ u.email }}</p>
+      <p>Phone: {{ u.phone }}</p>
+    </div>
+
+    <div class="user-questions-section">
+      <h3>My Questions</h3>
+      <p><i>The list of questions authored by this user will be displayed here...</i></p>
+    </div>
+
+    <div class="json-debug-section" style="margin-top: 30px; padding: 15px; background: #282a36; color: #f8f8f2; border-radius: 5px;">
+      <h4>Debug Data (Raw JSON)</h4>
+      <pre><code>{{ u | json }}</code></pre>
+    </div>
+  }
+</div>

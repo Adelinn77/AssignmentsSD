@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface QuestionRepository extends CrudRepository<Question, Long> {
     Question findByTitle(String title);
+    List<Question> findByAuthorUsername(String username);
     boolean existsByTitle(String title);
     void deleteByTitle(String title);
     boolean existsByText(String text);
