@@ -17,6 +17,8 @@ public class QuestionDTO {
 
     private String title;
     private String text;
+    private int likes;
+    private int dislikes;
     private LocalDateTime date;
     private Status status;
 
@@ -26,5 +28,4 @@ public class QuestionDTO {
 
     private List<String> imageUrls;
 
-    private int answerCount;
 }

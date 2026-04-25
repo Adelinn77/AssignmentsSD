@@ -6,7 +6,7 @@ import { UserProfile } from './features/users/pages/user-profile/user-profile';
 export const routes: Routes = [
   { path: 'questions', component: QuestionList },
   { path: 'auth/login', component: Login },
-  { path: 'users/profile', component: UserProfile },
+  { path: 'users/:username', component: UserProfile },
 
   { path: '', redirectTo: '/questions', pathMatch: 'full' },
 
