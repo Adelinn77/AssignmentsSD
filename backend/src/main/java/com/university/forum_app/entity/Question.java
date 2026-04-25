@@ -35,6 +35,12 @@ public class Question {
     @Column(name = "text")
     private String text;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int likes = 0;
+
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int dislikes = 0;
+
     @CreationTimestamp
     @Column(name = "date_and_time",updatable = false)
     private LocalDateTime date;
@@ -52,7 +58,7 @@ public class Question {
     private List<Tag> tags = new ArrayList<>();
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Answer> answer = new ArrayList<>();
+    private List<Answer> answers = new ArrayList<>();
 
     //a list of images attached to the question, could be null
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
