@@ -5,6 +5,7 @@ export enum Status {
 }
 
 export interface Question {
+  questionId: number;
   title: string;
   text: string;
   likes: number;

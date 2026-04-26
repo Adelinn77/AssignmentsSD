@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/answers")
+@CrossOrigin(origins = "http://localhost:4200")
 public class AnswerController {
 
     @Autowired
@@ -84,6 +85,26 @@ public class AnswerController {
         try {
             answerService.deleteAnswerById(id);
             return new ResponseEntity<>("Answer with id " + id + " was deleted successfully.", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/{id}/like")
+    public ResponseEntity<Object> likeAnswer(@PathVariable Long id) {
+        try {
+            AnswerDTO answer = answerService.likeAnswer(id);
+            return new ResponseEntity<>(answer, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/{id}/dislike")
+    public ResponseEntity<Object> dislikeAnswer(@PathVariable Long id) {
+        try {
+            AnswerDTO answer = answerService.dislikeAnswer(id);
+            return new ResponseEntity<>(answer, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
