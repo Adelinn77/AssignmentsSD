@@ -39,6 +39,7 @@ public class QuestionService {
 
     private QuestionDTO mapEntityToDTO(Question question) {
         return QuestionDTO.builder()
+                .questionId(question.getId())
                 .title(question.getTitle())
                 .text(question.getText())
                 .date(question.getDate())
@@ -46,7 +47,8 @@ public class QuestionService {
                 .authorName(question.getAuthor() != null ? question.getAuthor().getUsername() : null)
                 .tags(question.getTags() != null ? question.getTags().stream().map(Tag::getLabel).toList() : new ArrayList<>())
                 .imageUrls(question.getImages() != null ? question.getImages().stream().map(QuestionImage::getImageUrl).toList() : new ArrayList<>())
-                .answerCount(question.getAnswer() != null ? question.getAnswer().size() : 0)
+                .likes(question.getLikes())
+                .dislikes(question.getDislikes())
                 .build();
     }
 
@@ -72,6 +74,8 @@ public class QuestionService {
         return Question.builder()
                 .title(questionDTO.getTitle())
                 .text(questionDTO.getText())
+                .likes(questionDTO.getLikes())
+                .dislikes(questionDTO.getDislikes())
                 .date(questionDTO.getDate())
                 .status(questionDTO.getStatus())
                 .author(author)
@@ -157,6 +161,31 @@ public class QuestionService {
         } else {
             throw new IllegalArgumentException("No question exists with this title: '" + title + "'.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public QuestionDTO findQuestionById(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
+        return mapEntityToDTO(question);
+    }
+
+    @Transactional
+    public QuestionDTO likeQuestion(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
+        question.setLikes(question.getLikes() + 1);
+        questionRepository.save(question);
+        return mapEntityToDTO(question);
+    }
+
+    @Transactional
+    public QuestionDTO dislikeQuestion(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
+        question.setDislikes(question.getDislikes() + 1);
+        questionRepository.save(question);
+        return mapEntityToDTO(question);
     }
 
     @Transactional(readOnly = true)

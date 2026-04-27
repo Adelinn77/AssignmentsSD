@@ -22,7 +22,23 @@
 
     <div class="user-questions-section">
       <h3>My Questions</h3>
-      <p><i>The list of questions authored by this user will be displayed here...</i></p>
+
+      @if (userQuestions().length === 0) {
+        <p><i>The list of questions authored by this user is empty.</i></p>
+      } @else {
+        <ul class="user-questions-list">
+          @for (q of userQuestions(); track q.questionId) {
+            <li>
+              <a [routerLink]="['/answers/question', q.questionId]" class="question-link">
+                {{ q.title }}
+              </a>
+              <span class="question-score" [ngClass]="{'positive': q.likes - q.dislikes > 0, 'negative': q.likes - q.dislikes < 0}">
+                (Score: {{ q.likes - q.dislikes }})
+              </span>
+            </li>
+          }
+        </ul>
+      }
     </div>
 
     <div class="json-debug-section" style="margin-top: 30px; padding: 15px; background: #282a36; color: #f8f8f2; border-radius: 5px;">

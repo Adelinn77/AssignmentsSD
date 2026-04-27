@@ -1,0 +1,105 @@
+<div class="question-answer-container" *ngIf="!isLoading() && !errorMessage()">
+
+  <a routerLink="/questions" class="back-link">← Back to Questions</a>
+
+  <div class="question-card" *ngIf="question()">
+
+    <div class="question-header">
+      <div class="author-section">
+        <div class="author-avatar">{{ question()!.authorName.charAt(0).toUpperCase() }}</div>
+        <div class="author-info">
+          <span class="author-name">{{ question()!.authorName }}</span>
+          <span class="question-date">{{ question()!.date | date:'dd MMM yyyy, HH:mm' }}</span>
+        </div>
+      </div>
+      <div class="status-badge" [ngClass]="getStatusClass(question()!.status.toString())">
+        {{ getStatusLabel(question()!.status.toString()) }}
+      </div>
+    </div>
+
+    <div class="question-body">
+      <h1 class="question-title">{{ question()!.title }}</h1>
+      <p class="question-text">{{ question()!.text }}</p>
+    </div>
+
+    <div class="tags-container" *ngIf="question()!.tags && question()!.tags.length > 0">
+      <span class="tag" *ngFor="let tag of question()!.tags">{{ tag }}</span>
+    </div>
+
+    <div class="score-section">
+      <span class="score-label">Score:</span>
+      <span class="score-value" [ngClass]="{'positive': question()!.likes - question()!.dislikes > 0, 'negative': question()!.likes - question()!.dislikes < 0}">
+        {{ question()!.likes - question()!.dislikes }}
+      </span>
+    </div>
+
+    <div class="vote-actions">
+      <button class="vote-btn like-btn" (click)="likeQuestion()" id="btn-like-question">
+        <span class="vote-icon">👍</span>
+        <span class="vote-count">{{ question()!.likes }}</span>
+      </button>
+      <button class="vote-btn dislike-btn" (click)="dislikeQuestion()" id="btn-dislike-question">
+        <span class="vote-icon">👎</span>
+        <span class="vote-count">{{ question()!.dislikes }}</span>
+      </button>
+    </div>
+
+  </div>
+
+  <div class="answers-section">
+    <h2 class="answers-title">
+      Answers
+      <span class="answers-count">({{ answers().length }})</span>
+    </h2>
+
+    <div class="no-answers" *ngIf="answers().length === 0">
+      <p>No answers yet. Be the first to answer!</p>
+    </div>
+
+    <div class="answer-card" *ngFor="let answer of answers(); let i = index">
+      <div class="answer-header">
+        <div class="answer-author-section">
+          <div class="answer-avatar">{{ answer.authorName.charAt(0).toUpperCase() || '?' }}</div>
+          <div class="answer-author-info">
+            <span class="answer-author-name">{{ answer.authorName || 'Anonymous' }}</span>
+            <span class="answer-date">{{ answer.dateTime | date:'dd MMM yyyy, HH:mm' }}</span>
+          </div>
+        </div>
+        <span class="answer-number">#{{ i + 1 }}</span>
+      </div>
+
+      <div class="answer-body">
+        <p class="answer-text">{{ answer.text }}</p>
+      </div>
+
+      <div class="vote-actions answer-vote-actions">
+        <button class="vote-btn like-btn" (click)="likeAnswer(answer.answerId)" [id]="'btn-like-answer-' + answer.answerId">
+          <span class="vote-icon">👍</span>
+          <span class="vote-count">{{ answer.likes }}</span>
+        </button>
+        <button class="vote-btn dislike-btn" (click)="dislikeAnswer(answer.answerId)" [id]="'btn-dislike-answer-' + answer.answerId">
+          <span class="vote-icon">👎</span>
+          <span class="vote-count">{{ answer.dislikes }}</span>
+        </button>
+        <div class="answer-score">
+          <span class="score-label">Score:</span>
+          <span class="score-value" [ngClass]="{'positive': answer.likes - answer.dislikes > 0, 'negative': answer.likes - answer.dislikes < 0}">
+            {{ answer.likes - answer.dislikes }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+
+<div class="loading-container" *ngIf="isLoading()">
+  <div class="spinner"></div>
+  <p>Loading question...</p>
+</div>
+
+<div class="error-container" *ngIf="errorMessage()">
+  <p class="error-msg">{{ errorMessage() }}</p>
+  <a routerLink="/questions" class="back-link">← Back to Questions</a>
+</div>

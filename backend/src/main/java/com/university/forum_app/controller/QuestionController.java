@@ -12,6 +12,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/questions")
+@CrossOrigin(origins = "http://localhost:4200")
 public class QuestionController {
 
     @Autowired
@@ -82,6 +83,36 @@ public class QuestionController {
         try {
             questionService.deleteQuestionByTitle(title);
             return new ResponseEntity<>("Question with title '" + title + "' was deleted successfully.", HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Object> getQuestionById(@PathVariable Long id) {
+        try {
+            QuestionDTO question = questionService.findQuestionById(id);
+            return new ResponseEntity<>(question, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/{id}/like")
+    public ResponseEntity<Object> likeQuestion(@PathVariable Long id) {
+        try {
+            QuestionDTO question = questionService.likeQuestion(id);
+            return new ResponseEntity<>(question, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @PutMapping("/{id}/dislike")
+    public ResponseEntity<Object> dislikeQuestion(@PathVariable Long id) {
+        try {
+            QuestionDTO question = questionService.dislikeQuestion(id);
+            return new ResponseEntity<>(question, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }

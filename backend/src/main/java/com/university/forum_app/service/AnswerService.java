@@ -34,6 +34,10 @@ public class AnswerService {
                 .answerId(answer.getId())
                 .questionId(answer.getQuestion() != null ? answer.getQuestion().getId() : null)
                 .userId(answer.getAuthor() != null ? answer.getAuthor().getId() : null)
+                .authorName(answer.getAuthor() != null ? answer.getAuthor().getUsername() : null)
+                .text(answer.getText())
+                .likes(answer.getLikes())
+                .dislikes(answer.getDislikes())
                 .dateTime(answer.getDate())
                 .imageUrls(answer.getImages() != null
                         ? answer.getImages().stream().map(AnswerImage::getImageUrl).toList()
@@ -155,5 +159,23 @@ public class AnswerService {
         List<Answer> answers = new ArrayList<>();
         answerRepo.findAll().forEach(answers::add);
         return answers.stream().map(this::mapEntityToDTO).toList();
+    }
+
+    @Transactional
+    public AnswerDTO likeAnswer(Long id) {
+        Answer answer = answerRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No answer exists with id: '" + id + "'."));
+        answer.setLikes(answer.getLikes() + 1);
+        answerRepo.save(answer);
+        return mapEntityToDTO(answer);
+    }
+
+    @Transactional
+    public AnswerDTO dislikeAnswer(Long id) {
+        Answer answer = answerRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No answer exists with id: '" + id + "'."));
+        answer.setDislikes(answer.getDislikes() + 1);
+        answerRepo.save(answer);
+        return mapEntityToDTO(answer);
     }
 }

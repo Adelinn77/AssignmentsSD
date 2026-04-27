@@ -16,7 +16,10 @@ public class AnswerDTO {
     private Long answerId;
     private Long questionId;
     private Long userId;
+    private String authorName;
     private String text;
+    private int likes;
+    private int dislikes;
     private LocalDateTime dateTime;
     private List<String> imageUrls;
 }

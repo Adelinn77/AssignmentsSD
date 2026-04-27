@@ -1,1 +1,36 @@
-<p>question-list works!</p>
+<div class="questions-container">
+  <h2>Questions List</h2>
+
+  <table class="questions-table">
+    <thead>
+    <tr>
+      <th>Subject (Title & Text)</th>
+      <th>Author</th>
+      <th class="text-center">Author Score</th>
+      <th class="text-center">Feedback</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let question of questions()">
+      <td class="question-content">
+<!--        <div class="title">{{ question.title }}</div>-->
+        <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">
+          {{ question.title }}
+        </a>
+        <div class="text-preview">{{ question.text }}</div>
+      </td>
+      <td class="author-info">
+        <a [routerLink]="['/users', question.authorName]" class="author-link">
+          {{ question.authorName }}
+        </a>
+      </td>
+      <td class="text-center">
+        <div class="feedback-actions">
+          <span class="likes">👍 {{ question.likes }}</span>
+          <span class="dislikes">👎 {{ question.dislikes }}</span>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
+</div>
