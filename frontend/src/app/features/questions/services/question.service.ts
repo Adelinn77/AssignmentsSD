@@ -14,4 +14,20 @@ export class QuestionService {
   getAllQuestions(): Observable<Question[]> {
     return this.http.get<Question[]>(this.apiUrl);
   }
+
+  getQuestionById(id: number): Observable<Question> {
+    return this.http.get<Question>(`${this.apiUrl}/${id}`);
+  }
+
+  getQuestionsByAuthor(username: string): Observable<Question[]> {
+    return this.http.get<Question[]>(`${this.apiUrl}/author/${username}`);
+  }
+
+  likeQuestion(id: number): Observable<Question> {
+    return this.http.put<Question>(`${this.apiUrl}/${id}/like`, {});
+  }
+
+  dislikeQuestion(id: number): Observable<Question> {
+    return this.http.put<Question>(`${this.apiUrl}/${id}/dislike`, {});
+  }
 }

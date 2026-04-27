@@ -1,12 +1,13 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { QuestionService } from '../../services/question.service';
 import { Question } from '../../models/question.model';
 
 @Component({
   selector: 'app-question-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterLink],
   templateUrl: './question-list.html',
   styleUrl: './question-list.scss'
 })

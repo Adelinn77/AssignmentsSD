@@ -13,11 +13,16 @@
     <tbody>
     <tr *ngFor="let question of questions()">
       <td class="question-content">
-        <div class="title">{{ question.title }}</div>
+<!--        <div class="title">{{ question.title }}</div>-->
+        <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">
+          {{ question.title }}
+        </a>
         <div class="text-preview">{{ question.text }}</div>
       </td>
       <td class="author-info">
-        <span class="name">{{ question.authorName }}</span>
+        <a [routerLink]="['/users', question.authorName]" class="author-link">
+          {{ question.authorName }}
+        </a>
       </td>
       <td class="text-center">
         <div class="feedback-actions">
