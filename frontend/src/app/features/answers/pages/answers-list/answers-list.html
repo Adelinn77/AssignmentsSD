@@ -1,37 +1,31 @@
 <div class="question-answer-container" *ngIf="!isLoading() && !errorMessage()">
 
-  <!-- Back link -->
   <a routerLink="/questions" class="back-link">← Back to Questions</a>
 
-  <!-- Question Card -->
   <div class="question-card" *ngIf="question()">
 
-    <!-- Header: Author + Status -->
     <div class="question-header">
       <div class="author-section">
-        <div class="author-avatar">{{ question()!.authorName?.charAt(0)?.toUpperCase() }}</div>
+        <div class="author-avatar">{{ question()!.authorName.charAt(0).toUpperCase() }}</div>
         <div class="author-info">
           <span class="author-name">{{ question()!.authorName }}</span>
           <span class="question-date">{{ question()!.date | date:'dd MMM yyyy, HH:mm' }}</span>
         </div>
       </div>
-      <div class="status-badge" [ngClass]="getStatusClass(question()!.status?.toString())">
-        {{ getStatusLabel(question()!.status?.toString()) }}
+      <div class="status-badge" [ngClass]="getStatusClass(question()!.status.toString())">
+        {{ getStatusLabel(question()!.status.toString()) }}
       </div>
     </div>
 
-    <!-- Question Content -->
     <div class="question-body">
       <h1 class="question-title">{{ question()!.title }}</h1>
       <p class="question-text">{{ question()!.text }}</p>
     </div>
 
-    <!-- Tags -->
     <div class="tags-container" *ngIf="question()!.tags && question()!.tags.length > 0">
       <span class="tag" *ngFor="let tag of question()!.tags">{{ tag }}</span>
     </div>
 
-    <!-- Score Section -->
     <div class="score-section">
       <span class="score-label">Score:</span>
       <span class="score-value" [ngClass]="{'positive': question()!.likes - question()!.dislikes > 0, 'negative': question()!.likes - question()!.dislikes < 0}">
@@ -39,7 +33,6 @@
       </span>
     </div>
 
-    <!-- Like/Dislike Buttons -->
     <div class="vote-actions">
       <button class="vote-btn like-btn" (click)="likeQuestion()" id="btn-like-question">
         <span class="vote-icon">👍</span>
@@ -53,7 +46,6 @@
 
   </div>
 
-  <!-- Answers Section -->
   <div class="answers-section">
     <h2 class="answers-title">
       Answers
@@ -64,11 +56,10 @@
       <p>No answers yet. Be the first to answer!</p>
     </div>
 
-    <!-- Answer Cards -->
     <div class="answer-card" *ngFor="let answer of answers(); let i = index">
       <div class="answer-header">
         <div class="answer-author-section">
-          <div class="answer-avatar">{{ answer.authorName?.charAt(0)?.toUpperCase() || '?' }}</div>
+          <div class="answer-avatar">{{ answer.authorName.charAt(0).toUpperCase() || '?' }}</div>
           <div class="answer-author-info">
             <span class="answer-author-name">{{ answer.authorName || 'Anonymous' }}</span>
             <span class="answer-date">{{ answer.dateTime | date:'dd MMM yyyy, HH:mm' }}</span>
@@ -81,7 +72,6 @@
         <p class="answer-text">{{ answer.text }}</p>
       </div>
 
-      <!-- Answer Vote Actions -->
       <div class="vote-actions answer-vote-actions">
         <button class="vote-btn like-btn" (click)="likeAnswer(answer.answerId)" [id]="'btn-like-answer-' + answer.answerId">
           <span class="vote-icon">👍</span>
@@ -104,13 +94,11 @@
 
 </div>
 
-<!-- Loading State -->
 <div class="loading-container" *ngIf="isLoading()">
   <div class="spinner"></div>
   <p>Loading question...</p>
 </div>
 
-<!-- Error State -->
 <div class="error-container" *ngIf="errorMessage()">
   <p class="error-msg">{{ errorMessage() }}</p>
   <a routerLink="/questions" class="back-link">← Back to Questions</a>

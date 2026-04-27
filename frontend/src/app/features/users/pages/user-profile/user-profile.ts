@@ -2,12 +2,14 @@ import {Component, inject, Input, OnInit, signal} from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
 import { CommonModule, JsonPipe } from '@angular/common';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, RouterLink} from '@angular/router';
+import { Question } from '../../../questions/models/question.model';
+import { QuestionService } from '../../../questions/services/question.service';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [CommonModule, JsonPipe],
+  imports: [CommonModule, JsonPipe, RouterLink],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.scss'
 })
@@ -16,29 +18,24 @@ export class UserProfile implements OnInit {
 
   private route = inject(ActivatedRoute);
   private userService = inject(UserService);
-
+  private questionService = inject(QuestionService);
 
   user = signal<User | null>(null);
+  userQuestions = signal<Question[]>([]);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
 
   ngOnInit(): void {
     const routeUsername = this.route.snapshot.paramMap.get('username');
 
-    // This correctly holds "ion_pop" from the URL
     const targetUsername = routeUsername || this.username;
 
-    // MODIFIED: Check targetUsername instead of this.username
     if (targetUsername) {
-      // MODIFIED: Pass targetUsername to the fetch function
       this.fetchData(targetUsername);
+      this.fetchUserQuestions(targetUsername);
     }
   }
 
-  /**
-   * Triggers the service call to retrieve user details
-   * (Remains exactly as you wrote it)
-   */
   fetchData(username: string): void {
     this.isLoading.set(true);
     this.userService.getUserByUsername(username).subscribe({
@@ -50,6 +47,17 @@ export class UserProfile implements OnInit {
         this.errorMessage.set('Failed to load user profile. Please try again.');
         this.isLoading.set(false);
         console.error('API Error:', err);
+      }
+    });
+  }
+
+  fetchUserQuestions(username: string): void {
+    this.questionService.getQuestionsByAuthor(username).subscribe({
+      next: (data) => {
+        this.userQuestions.set(data);
+      },
+      error: (err) => {
+        console.error('API Error loading questions:', err);
       }
     });
   }

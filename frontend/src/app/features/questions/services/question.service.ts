@@ -19,6 +19,10 @@ export class QuestionService {
     return this.http.get<Question>(`${this.apiUrl}/${id}`);
   }
 
+  getQuestionsByAuthor(username: string): Observable<Question[]> {
+    return this.http.get<Question[]>(`${this.apiUrl}/author/${username}`);
+  }
+
   likeQuestion(id: number): Observable<Question> {
     return this.http.put<Question>(`${this.apiUrl}/${id}/like`, {});
   }

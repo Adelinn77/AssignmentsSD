@@ -1,19 +1,19 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { QuestionService } from '../../services/question.service';
+import { QuestionService } from '../../../questions/services/question.service';
 import { AnswerService } from '../../services/answer.service';
-import { Question } from '../../models/question.model';
+import { Question } from '../../../questions/models/question.model';
 import { Answer } from '../../models/answer.model';
 
 @Component({
   selector: 'app-question-answer',
   standalone: true,
   imports: [CommonModule, RouterLink],
-  templateUrl: './question-answers.html',
-  styleUrl: './question-answers.scss'
+  templateUrl: './answers-list.html',
+  styleUrl: './answers-list.scss'
 })
-export class QuestionAnswer implements OnInit {
+export class AnswersList implements OnInit {
   private route = inject(ActivatedRoute);
   private questionService = inject(QuestionService);
   private answerService = inject(AnswerService);
