@@ -1,0 +1,26 @@
+{
+  "name": "cypress-e2e-tests",
+  "version": "1.0.0",
+  "description": "Cypress E2E tests for Forum App (Spring Boot + Angular)",
+  "main": "index.js",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run": "cypress run",
+    "cy:run:users": "cypress run --spec cypress/e2e/users.cy.js",
+    "cy:run:questions": "cypress run --spec cypress/e2e/questions.cy.js",
+    "cy:run:answers": "cypress run --spec cypress/e2e/answers.cy.js",
+    "cy:run:tags": "cypress run --spec cypress/e2e/tags.cy.js",
+    "cy:run:frontend": "cypress run --spec cypress/e2e/frontend.cy.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "cypress": "^15.14.1",
+    "cypress-file-upload": "^5.0.8",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^5.1.1",
+    "mochawesome-report-generator": "^6.3.2"
+  }
+}
