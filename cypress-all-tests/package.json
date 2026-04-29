@@ -1,0 +1,26 @@
+{
+  "name": "cypress-all-tests",
+  "version": "1.0.0",
+  "description": "Unified Cypress Suite (E2E + Unit)",
+  "scripts": {
+    "cy:open": "cypress open",
+    "cy:run:all": "cypress run",
+    "cy:run:e2e": "cypress run --spec \"cypress/e2e/integration/**/*.cy.js\"",
+    "cy:run:unit-api": "cypress run --spec \"cypress/e2e/api-unit/**/*.cy.js\"",
+    "cy:run:unit-ui": "cypress run --spec \"cypress/e2e/component-unit/**/*.cy.js\""
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^21.2.8",
+    "@angular-devkit/core": "^21.2.8",
+    "cypress": "^15.14.1",
+    "cypress-file-upload": "^5.0.8",
+    "mochawesome": "^7.1.4",
+    "mochawesome-merge": "^5.1.1",
+    "mochawesome-report-generator": "^6.3.2"
+  },
+  "main": "cypress.config.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}
