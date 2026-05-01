@@ -4,33 +4,67 @@
   <table class="questions-table">
     <thead>
     <tr>
-      <th>Subject (Title & Text)</th>
+      <th>Subject (Title &amp; Text)</th>
       <th>Author</th>
       <th class="text-center">Author Score</th>
       <th class="text-center">Feedback</th>
+      <th class="text-center">Actions</th>
     </tr>
     </thead>
     <tbody>
-    <tr *ngFor="let question of questions()">
-      <td class="question-content">
-<!--        <div class="title">{{ question.title }}</div>-->
-        <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">
-          {{ question.title }}
-        </a>
-        <div class="text-preview">{{ question.text }}</div>
-      </td>
-      <td class="author-info">
-        <a [routerLink]="['/users', question.authorName]" class="author-link">
-          {{ question.authorName }}
-        </a>
-      </td>
-      <td class="text-center">
-        <div class="feedback-actions">
-          <span class="likes">👍 {{ question.likes }}</span>
-          <span class="dislikes">👎 {{ question.dislikes }}</span>
-        </div>
-      </td>
-    </tr>
+    <ng-container *ngFor="let question of questions()">
+
+      <!-- Edit row -->
+      <tr *ngIf="editingQuestion()?.questionId === question.questionId; else viewRow">
+        <td class="question-content" colspan="4">
+          <div class="edit-form">
+            <input class="edit-input" type="text"
+                   [ngModel]="editTitle()" (ngModelChange)="editTitle.set($event)"
+                   placeholder="Title" />
+            <textarea class="edit-textarea"
+                      [ngModel]="editText()" (ngModelChange)="editText.set($event)"
+                      placeholder="Text" rows="3"></textarea>
+            <div class="edit-actions">
+              <button class="btn-save" (click)="saveEdit()" id="btn-save-edit">Save</button>
+              <button class="btn-cancel" (click)="cancelEdit()" id="btn-cancel-edit">Cancel</button>
+            </div>
+          </div>
+        </td>
+        <td></td>
+      </tr>
+
+      <!-- Normal view row -->
+      <ng-template #viewRow>
+        <tr>
+          <td class="question-content">
+            <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">
+              {{ question.title }}
+            </a>
+            <div class="text-preview">{{ question.text }}</div>
+          </td>
+          <td class="author-info">
+            <a [routerLink]="['/users', question.authorName]" class="author-link">
+              {{ question.authorName }}
+            </a>
+          </td>
+          <td class="text-center">
+            <div class="feedback-actions">
+              <span class="likes">👍 {{ question.likes }}</span>
+              <span class="dislikes">👎 {{ question.dislikes }}</span>
+            </div>
+          </td>
+          <td class="text-center">
+            <ng-container *ngIf="isAuthor(question)">
+              <button class="btn-edit" (click)="startEdit(question)"
+                      [id]="'btn-edit-' + question.questionId">Edit</button>
+              <button class="btn-delete" (click)="deleteQuestion(question)"
+                      [id]="'btn-delete-' + question.questionId">Delete</button>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+
+    </ng-container>
     </tbody>
   </table>
 </div>

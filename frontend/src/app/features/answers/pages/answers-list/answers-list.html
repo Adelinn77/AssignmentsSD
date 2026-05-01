@@ -4,45 +4,72 @@
 
   <div class="question-card" *ngIf="question()">
 
-    <div class="question-header">
-      <div class="author-section">
-        <div class="author-avatar">{{ question()!.authorName.charAt(0).toUpperCase() }}</div>
-        <div class="author-info">
-          <span class="author-name">{{ question()!.authorName }}</span>
-          <span class="question-date">{{ question()!.date | date:'dd MMM yyyy, HH:mm' }}</span>
+    <!-- Normal view -->
+    <ng-container *ngIf="!isEditingQuestion()">
+      <div class="question-header">
+        <div class="author-section">
+          <div class="author-avatar">{{ question()!.authorName.charAt(0).toUpperCase() }}</div>
+          <div class="author-info">
+            <span class="author-name">{{ question()!.authorName }}</span>
+            <span class="question-date">{{ question()!.date | date:'dd MMM yyyy, HH:mm' }}</span>
+          </div>
+        </div>
+        <div class="status-badge" [ngClass]="getStatusClass(question()!.status.toString())">
+          {{ getStatusLabel(question()!.status.toString()) }}
         </div>
       </div>
-      <div class="status-badge" [ngClass]="getStatusClass(question()!.status.toString())">
-        {{ getStatusLabel(question()!.status.toString()) }}
+
+      <div class="question-body">
+        <h1 class="question-title">{{ question()!.title }}</h1>
+        <p class="question-text">{{ question()!.text }}</p>
       </div>
-    </div>
 
-    <div class="question-body">
-      <h1 class="question-title">{{ question()!.title }}</h1>
-      <p class="question-text">{{ question()!.text }}</p>
-    </div>
+      <div class="tags-container" *ngIf="question()!.tags && question()!.tags.length > 0">
+        <span class="tag" *ngFor="let tag of question()!.tags">{{ tag }}</span>
+      </div>
 
-    <div class="tags-container" *ngIf="question()!.tags && question()!.tags.length > 0">
-      <span class="tag" *ngFor="let tag of question()!.tags">{{ tag }}</span>
-    </div>
+      <div class="score-section">
+        <span class="score-label">Score:</span>
+        <span class="score-value" [ngClass]="{'positive': question()!.likes - question()!.dislikes > 0, 'negative': question()!.likes - question()!.dislikes < 0}">
+          {{ question()!.likes - question()!.dislikes }}
+        </span>
+      </div>
 
-    <div class="score-section">
-      <span class="score-label">Score:</span>
-      <span class="score-value" [ngClass]="{'positive': question()!.likes - question()!.dislikes > 0, 'negative': question()!.likes - question()!.dislikes < 0}">
-        {{ question()!.likes - question()!.dislikes }}
-      </span>
-    </div>
+      <div class="vote-actions">
+        <button class="vote-btn like-btn" (click)="likeQuestion()" id="btn-like-question">
+          <span class="vote-icon">👍</span>
+          <span class="vote-count">{{ question()!.likes }}</span>
+        </button>
+        <button class="vote-btn dislike-btn" (click)="dislikeQuestion()" id="btn-dislike-question">
+          <span class="vote-icon">👎</span>
+          <span class="vote-count">{{ question()!.dislikes }}</span>
+        </button>
+      </div>
 
-    <div class="vote-actions">
-      <button class="vote-btn like-btn" (click)="likeQuestion()" id="btn-like-question">
-        <span class="vote-icon">👍</span>
-        <span class="vote-count">{{ question()!.likes }}</span>
-      </button>
-      <button class="vote-btn dislike-btn" (click)="dislikeQuestion()" id="btn-dislike-question">
-        <span class="vote-icon">👎</span>
-        <span class="vote-count">{{ question()!.dislikes }}</span>
-      </button>
-    </div>
+      <!-- Author-only actions -->
+      <div class="author-actions" *ngIf="isQuestionAuthor()">
+        <button class="btn-edit" (click)="startEditQuestion()" id="btn-edit-question">Edit</button>
+        <button class="btn-delete" (click)="deleteQuestion()" id="btn-delete-question">Delete</button>
+      </div>
+    </ng-container>
+
+    <!-- Inline edit form -->
+    <ng-container *ngIf="isEditingQuestion()">
+      <div class="edit-form">
+        <label>Title</label>
+        <input class="edit-input" type="text"
+               [ngModel]="editTitle()" (ngModelChange)="editTitle.set($event)"
+               placeholder="Title" />
+        <label>Text</label>
+        <textarea class="edit-textarea"
+                  [ngModel]="editText()" (ngModelChange)="editText.set($event)"
+                  placeholder="Text" rows="4"></textarea>
+        <div class="edit-actions">
+          <button class="btn-save" (click)="saveEditQuestion()" id="btn-save-question">Save</button>
+          <button class="btn-cancel" (click)="cancelEditQuestion()" id="btn-cancel-question">Cancel</button>
+        </div>
+      </div>
+    </ng-container>
 
   </div>
 
