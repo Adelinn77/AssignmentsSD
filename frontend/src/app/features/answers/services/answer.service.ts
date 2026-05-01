@@ -22,4 +22,8 @@ export class AnswerService {
   dislikeAnswer(id: number): Observable<Answer> {
     return this.http.put<Answer>(`${this.apiUrl}/${id}/dislike`, {});
   }
+
+  createAnswer(answer: Partial<Answer>): Observable<Answer> {
+    return this.http.post<Answer>(this.apiUrl, answer);
+  }
 }

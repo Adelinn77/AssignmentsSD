@@ -1,5 +1,8 @@
 <div class="questions-container">
-  <h2>Questions List</h2>
+  <div class="header-section">
+    <h2>Questions List</h2>
+    <button (click)="openAddQuestionPanel()" class="add-question-btn">Add New Question</button>
+  </div>
 
   <table class="questions-table">
     <thead>
@@ -33,4 +36,54 @@
     </tr>
     </tbody>
   </table>
+
+  <!-- Add Question Panel -->
+  <div class="add-question-panel" *ngIf="showAddQuestionPanel()">
+    <div class="panel-overlay" (click)="closeAddQuestionPanel()"></div>
+    <div class="panel-content">
+      <h3>Add New Question</h3>
+
+      <div class="error-message" *ngIf="errorMessage()">
+        {{ errorMessage() }}
+      </div>
+
+      <div class="form-group">
+        <label for="questionTitle">Title</label>
+        <input
+          id="questionTitle"
+          type="text"
+          [value]="newQuestionTitle()"
+          (input)="newQuestionTitle.set($any($event.target).value)"
+          placeholder="Enter question title"
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="questionText">Question Text</label>
+        <textarea
+          id="questionText"
+          [value]="newQuestionText()"
+          (input)="newQuestionText.set($any($event.target).value)"
+          placeholder="Enter your question"
+          rows="6"
+        ></textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="questionTags">Tags (comma separated)</label>
+        <input
+          id="questionTags"
+          type="text"
+          [value]="newQuestionTags()"
+          (input)="newQuestionTags.set($any($event.target).value)"
+          placeholder="e.g., javascript, angular, typescript"
+        />
+      </div>
+
+      <div class="panel-actions">
+        <button (click)="postQuestion()" class="post-btn">Post Question</button>
+        <button (click)="closeAddQuestionPanel()" class="cancel-btn">Cancel</button>
+      </div>
+    </div>
+  </div>
 </div>

@@ -22,6 +22,9 @@ export class AnswersList implements OnInit {
   answers = signal<Answer[]>([]);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
+  showAddAnswerPanel = signal<boolean>(false);
+
+  newAnswerText = signal<string>('');
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -117,5 +120,64 @@ export class AnswersList implements OnInit {
       case 'RESOLVED': return 'Resolved';
       default: return status;
     }
+  }
+
+  openAddAnswerPanel(): void {
+    this.showAddAnswerPanel.set(true);
+    this.errorMessage.set(null);
+  }
+
+  closeAddAnswerPanel(): void {
+    this.showAddAnswerPanel.set(false);
+    this.resetAnswerForm();
+  }
+
+  resetAnswerForm(): void {
+    this.newAnswerText.set('');
+  }
+
+  postAnswer(): void {
+    const text = this.newAnswerText();
+    const q = this.question();
+
+    if (!text) {
+      this.errorMessage.set('Answer text is required.');
+      return;
+    }
+
+    if (!q) {
+      this.errorMessage.set('Question not found.');
+      return;
+    }
+
+    const newAnswer: Partial<Answer> = {
+      questionId: q.questionId,
+      text,
+      authorName: 'ion_pop' // TODO: Replace with actual logged-in user
+    };
+
+    this.isLoading.set(true);
+    this.answerService.createAnswer(newAnswer).subscribe({
+      next: (createdAnswer) => {
+        this.answers.update(answers => [...answers, createdAnswer]);
+        this.closeAddAnswerPanel();
+        this.isLoading.set(false);
+        // Refresh the question to get updated status
+        if (q) {
+          this.loadQuestion(q.questionId);
+        }
+      },
+      error: (err) => {
+        console.error('Error creating answer:', err);
+        let errorMsg = 'Could not create answer. Please try again.';
+
+        if (err.error) {
+          errorMsg = typeof err.error === 'string' ? err.error : err.error.message || errorMsg;
+        }
+
+        this.errorMessage.set(errorMsg);
+        this.isLoading.set(false);
+      }
+    });
   }
 }
