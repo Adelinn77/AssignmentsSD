@@ -76,3 +76,6 @@ VALUES
     (2, 'https://dummyimage.com/600x400/000/fff&text=jpa_jointable_example.png'),
     -- Image for Maria's answer (A4) to the image upload question
     (4, 'https://dummyimage.com/600x400/000/fff&text=aws_s3_bucket_setup.png');
+
+
+# DROP SCHEMA IF EXISTS `forum-app`;
