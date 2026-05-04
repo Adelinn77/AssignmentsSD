@@ -23,6 +23,14 @@ export class QuestionService {
     return this.http.get<Question[]>(`${this.apiUrl}/author/${username}`);
   }
 
+  updateQuestion(currentTitle: string, question: Question): Observable<Question> {
+    return this.http.put<Question>(`${this.apiUrl}/title/${encodeURIComponent(currentTitle)}`, question);
+  }
+
+  deleteQuestion(title: string): Observable<string> {
+    return this.http.delete(`${this.apiUrl}/title/${encodeURIComponent(title)}`, { responseType: 'text' });
+  }
+
   likeQuestion(id: number): Observable<Question> {
     return this.http.put<Question>(`${this.apiUrl}/${id}/like`, {});
   }

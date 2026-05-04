@@ -1,0 +1,63 @@
+/* Edit/Delete action buttons */
+.btn-edit,
+.btn-delete,
+.btn-save,
+.btn-cancel {
+  border: none;
+  border-radius: 4px;
+  padding: 4px 10px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  margin: 2px;
+}
+
+.btn-edit {
+  background-color: #4a90e2;
+  color: #fff;
+
+  &:hover { background-color: #357abd; }
+}
+
+.btn-delete {
+  background-color: #e05252;
+  color: #fff;
+
+  &:hover { background-color: #c0392b; }
+}
+
+.btn-save {
+  background-color: #27ae60;
+  color: #fff;
+
+  &:hover { background-color: #1e8449; }
+}
+
+.btn-cancel {
+  background-color: #95a5a6;
+  color: #fff;
+
+  &:hover { background-color: #7f8c8d; }
+}
+
+/* Inline edit form inside the table row */
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  .edit-input,
+  .edit-textarea {
+    width: 100%;
+    padding: 6px 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    box-sizing: border-box;
+    resize: vertical;
+  }
+
+  .edit-actions {
+    display: flex;
+    gap: 6px;
+  }
+}
