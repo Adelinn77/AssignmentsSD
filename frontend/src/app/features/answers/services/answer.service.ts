@@ -26,4 +26,16 @@ export class AnswerService {
   createAnswer(answer: Partial<Answer>): Observable<Answer> {
     return this.http.post<Answer>(this.apiUrl, answer);
   }
+
+  createAnswerWithImages(answer: Partial<Answer>, images: File[]): Observable<Answer> {
+    const formData = new FormData();
+
+    formData.append('answer', new Blob([JSON.stringify(answer)], { type: 'application/json' }));
+
+    images.forEach((image) => {
+      formData.append('images', image);
+    });
+
+    return this.http.post<Answer>(`${this.apiUrl}/with-images`, formData);
+  }
 }

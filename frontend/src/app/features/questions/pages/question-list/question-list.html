@@ -1,47 +1,13 @@
 <div class="questions-container">
   <div class="header-section">
     <h2>Questions List</h2>
-    <button (click)="openAddQuestionPanel()" class="add-question-btn">Add New Question</button>
+    <button *ngIf="!showAddQuestionPanel()" (click)="openAddQuestionPanel()" class="add-question-btn">Add New Question</button>
   </div>
 
-  <table class="questions-table">
-    <thead>
-    <tr>
-      <th>Subject (Title & Text)</th>
-      <th>Author</th>
-      <th class="text-center">Author Score</th>
-      <th class="text-center">Feedback</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr *ngFor="let question of questions()">
-      <td class="question-content">
-<!--        <div class="title">{{ question.title }}</div>-->
-        <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">
-          {{ question.title }}
-        </a>
-        <div class="text-preview">{{ question.text }}</div>
-      </td>
-      <td class="author-info">
-        <a [routerLink]="['/users', question.authorName]" class="author-link">
-          {{ question.authorName }}
-        </a>
-      </td>
-      <td class="text-center">
-        <div class="feedback-actions">
-          <span class="likes">👍 {{ question.likes }}</span>
-          <span class="dislikes">👎 {{ question.dislikes }}</span>
-        </div>
-      </td>
-    </tr>
-    </tbody>
-  </table>
-
-  <!-- Add Question Panel -->
-  <div class="add-question-panel" *ngIf="showAddQuestionPanel()">
-    <div class="panel-overlay" (click)="closeAddQuestionPanel()"></div>
+  <!-- Add Question Panel - Acum este mutat SUS și integrat direct -->
+  <div class="add-question-panel" *ngIf="showAddQuestionPanel()" style="margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
     <div class="panel-content">
-      <h3>Add New Question</h3>
+      <h3 style="margin-top: 0;">Add New Question</h3>
 
       <div class="error-message" *ngIf="errorMessage()">
         {{ errorMessage() }}
@@ -80,10 +46,214 @@
         />
       </div>
 
+      <!-- Previzualizare Imagini tip Facebook / Instagram -->
+      <div class="form-group">
+        <label>Attachments</label>
+
+        <div class="image-previews-container" *ngIf="selectedImages().length > 0" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+          <div *ngFor="let img of selectedImages(); let i = index" style="position: relative; display: inline-block;">
+            <img [src]="img.url" alt="Preview" style="max-height: 200px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;">
+            <button type="button" (click)="removeImage(i)" title="Remove image" style="position: absolute; top: -10px; right: -10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="file-upload-actions" style="margin-bottom: 10px;">
+          <input
+            type="file"
+            multiple
+            accept="image/*"
+            (change)="onImagesSelected($event)"
+            #fileInput
+            style="display: none;"
+          >
+          <button type="button" class="btn-add-image" (click)="fileInput.click()" style="padding: 8px 15px; cursor: pointer; background: #f0f2f5; border: 1px solid #ccc; border-radius: 6px;">
+            📷 Add Images
+          </button>
+        </div>
+      </div>
+
       <div class="panel-actions">
         <button (click)="postQuestion()" class="post-btn">Post Question</button>
         <button (click)="closeAddQuestionPanel()" class="cancel-btn">Cancel</button>
       </div>
     </div>
   </div>
+
+  <table class="questions-table">
+    <thead>
+    <tr>
+      <th>Subject (Title & Text)</th>
+      <th>Author</th>
+      <th class="text-center">Author Score</th>
+      <th class="text-center">Feedback</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let question of questions()">
+      <td class="question-content">
+        <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">
+          {{ question.title }}
+        </a>
+
+        <!-- Imagini afișate sub titlu, stilizate mai mare pentru vizibilitate clară -->
+        <div class="question-images-preview" *ngIf="question.imageUrls && question.imageUrls.length > 0" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
+          <img *ngFor="let imgUrl of question.imageUrls"
+               [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
+               alt="Question Image"
+               style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #eaeaea; object-fit: contain;">
+        </div>
+
+        <div class="text-preview" style="margin-top: 10px;">{{ question.text }}</div>
+      </td>
+      <td class="author-info">
+        <a [routerLink]="['/users', question.authorName]" class="author-link">
+          {{ question.authorName }}
+        </a>
+      </td>
+      <td class="text-center">
+        <div class="feedback-actions">
+          <span class="likes">👍 {{ question.likes }}</span>
+          <span class="dislikes">👎 {{ question.dislikes }}</span>
+        </div>
+      </td>
+    </tr>
+    </tbody>
+  </table>
 </div>
+
+
+
+
+
+
+
+
+
+
+
+
+<!--<div class="questions-container">-->
+<!--  <div class="header-section">-->
+<!--    <h2>Questions List</h2>-->
+<!--    <button (click)="openAddQuestionPanel()" class="add-question-btn">Add New Question</button>-->
+<!--  </div>-->
+
+<!--  <table class="questions-table">-->
+<!--    <thead>-->
+<!--    <tr>-->
+<!--      <th>Subject (Title & Text)</th>-->
+<!--      <th>Author</th>-->
+<!--      <th class="text-center">Author Score</th>-->
+<!--      <th class="text-center">Feedback</th>-->
+<!--    </tr>-->
+<!--    </thead>-->
+<!--    <tbody>-->
+<!--    <tr *ngFor="let question of questions()">-->
+<!--      <td class="question-content">-->
+<!--&lt;!&ndash;        <div class="title">{{ question.title }}</div>&ndash;&gt;-->
+<!--        <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">-->
+<!--          {{ question.title }}-->
+<!--        </a>-->
+<!--        <div class="question-images-preview" *ngIf="question.imageUrls && question.imageUrls.length > 0" style="margin-top: 10px; display: flex; gap: 10px; overflow-x: auto;">-->
+<!--          &lt;!&ndash; Note: Adjust the base URL below if your backend serves files from a different path &ndash;&gt;-->
+<!--          <img *ngFor="let imgUrl of question.imageUrls"-->
+<!--               [src]="'http://localhost:8080/uploads/questions/' + imgUrl"-->
+<!--               alt="Question Image"-->
+<!--               style="max-height: 100px; border-radius: 4px; border: 1px solid #ccc;">-->
+<!--        </div>-->
+<!--        <div class="text-preview">{{ question.text }}</div>-->
+<!--      </td>-->
+<!--      <td class="author-info">-->
+<!--        <a [routerLink]="['/users', question.authorName]" class="author-link">-->
+<!--          {{ question.authorName }}-->
+<!--        </a>-->
+<!--      </td>-->
+<!--      <td class="text-center">-->
+<!--        <div class="feedback-actions">-->
+<!--          <span class="likes">👍 {{ question.likes }}</span>-->
+<!--          <span class="dislikes">👎 {{ question.dislikes }}</span>-->
+<!--        </div>-->
+<!--      </td>-->
+<!--    </tr>-->
+<!--    </tbody>-->
+<!--  </table>-->
+
+<!--  &lt;!&ndash; Add Question Panel &ndash;&gt;-->
+<!--  <div class="add-question-panel" *ngIf="showAddQuestionPanel()">-->
+<!--    <div class="panel-overlay" (click)="closeAddQuestionPanel()"></div>-->
+<!--    <div class="panel-content">-->
+<!--      <h3>Add New Question</h3>-->
+
+<!--      <div class="error-message" *ngIf="errorMessage()">-->
+<!--        {{ errorMessage() }}-->
+<!--      </div>-->
+
+<!--      <div class="form-group">-->
+<!--        <label for="questionTitle">Title</label>-->
+<!--        <input-->
+<!--          id="questionTitle"-->
+<!--          type="text"-->
+<!--          [value]="newQuestionTitle()"-->
+<!--          (input)="newQuestionTitle.set($any($event.target).value)"-->
+<!--          placeholder="Enter question title"-->
+<!--        />-->
+<!--      </div>-->
+
+<!--      <div class="form-group">-->
+<!--        <label for="questionText">Question Text</label>-->
+<!--        <textarea-->
+<!--          id="questionText"-->
+<!--          [value]="newQuestionText()"-->
+<!--          (input)="newQuestionText.set($any($event.target).value)"-->
+<!--          placeholder="Enter your question"-->
+<!--          rows="6"-->
+<!--        ></textarea>-->
+<!--      </div>-->
+
+<!--      <div class="form-group">-->
+<!--        <label for="questionTags">Tags (comma separated)</label>-->
+<!--        <input-->
+<!--          id="questionTags"-->
+<!--          type="text"-->
+<!--          [value]="newQuestionTags()"-->
+<!--          (input)="newQuestionTags.set($any($event.target).value)"-->
+<!--          placeholder="e.g., javascript, angular, typescript"-->
+<!--        />-->
+<!--      </div>-->
+
+<!--      <div class="form-group">-->
+<!--        <label>Attachments</label>-->
+<!--        <div class="file-upload-actions" style="margin-bottom: 10px;">-->
+
+<!--          <input-->
+<!--            type="file"-->
+<!--            multiple-->
+<!--            accept="image/*"-->
+<!--            (change)="onImagesSelected($event)"-->
+<!--            #fileInput-->
+<!--            style="display: none;"-->
+<!--          >-->
+<!--          <button type="button" class="btn-add-image" (click)="fileInput.click()" style="padding: 5px 10px; cursor: pointer;">-->
+<!--            + Add Image-->
+<!--          </button>-->
+<!--        </div>-->
+
+<!--        <ul class="selected-images-list" *ngIf="selectedImages().length > 0" style="list-style: none; padding: 0;">-->
+<!--          <li *ngFor="let file of selectedImages(); let i = index" style="display: flex; justify-content: space-between; margin-bottom: 5px; background: #f5f5f5; padding: 5px; border-radius: 4px;">-->
+<!--            <span>{{ file.name }}</span>-->
+<!--            <button type="button" (click)="removeImage(i)" style="color: red; border: none; background: none; cursor: pointer;">-->
+<!--              ✕-->
+<!--            </button>-->
+<!--          </li>-->
+<!--        </ul>-->
+<!--      </div>-->
+
+<!--      <div class="panel-actions">-->
+<!--        <button (click)="postQuestion()" class="post-btn">Post Question</button>-->
+<!--        <button (click)="closeAddQuestionPanel()" class="cancel-btn">Cancel</button>-->
+<!--      </div>-->
+<!--    </div>-->
+<!--  </div>-->
+<!--</div>-->

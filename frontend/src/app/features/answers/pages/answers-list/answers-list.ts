@@ -25,6 +25,8 @@ export class AnswersList implements OnInit {
   showAddAnswerPanel = signal<boolean>(false);
 
   newAnswerText = signal<string>('');
+  fullscreenImageUrl = signal<string | null>(null);
+  selectedAnswerImages = signal<{file: File, url: string}[]>([]);
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -134,6 +136,8 @@ export class AnswersList implements OnInit {
 
   resetAnswerForm(): void {
     this.newAnswerText.set('');
+    this.selectedAnswerImages().forEach(img => URL.revokeObjectURL(img.url));
+    this.selectedAnswerImages.set([]);
   }
 
   postAnswer(): void {
@@ -153,16 +157,22 @@ export class AnswersList implements OnInit {
     const newAnswer: Partial<Answer> = {
       questionId: q.questionId,
       text,
-      authorName: 'ion_pop' // TODO: Replace with actual logged-in user
+      authorName: 'ion_pop'
     };
 
     this.isLoading.set(true);
-    this.answerService.createAnswer(newAnswer).subscribe({
+
+    const imagesToUpload = this.selectedAnswerImages().map(img => img.file);
+
+    const request$ = imagesToUpload.length > 0
+      ? this.answerService.createAnswerWithImages(newAnswer, imagesToUpload)
+      : this.answerService.createAnswer(newAnswer);
+
+    request$.subscribe({
       next: (createdAnswer) => {
         this.answers.update(answers => [...answers, createdAnswer]);
         this.closeAddAnswerPanel();
         this.isLoading.set(false);
-        // Refresh the question to get updated status
         if (q) {
           this.loadQuestion(q.questionId);
         }
@@ -179,5 +189,35 @@ export class AnswersList implements OnInit {
         this.isLoading.set(false);
       }
     });
+  }
+
+  onAnswerImagesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      const filesArray = Array.from(input.files);
+      const newImages = filesArray.map(file => ({
+        file,
+        url: URL.createObjectURL(file)
+      }));
+      this.selectedAnswerImages.update(prev => [...prev, ...newImages]);
+      input.value = '';
+    }
+  }
+
+  removeAnswerImage(index: number): void {
+    this.selectedAnswerImages.update(images => {
+      const updated = [...images];
+      URL.revokeObjectURL(updated[index].url);
+      updated.splice(index, 1);
+      return updated;
+    });
+  }
+
+  openFullscreen(imageUrl: string): void {
+    this.fullscreenImageUrl.set(imageUrl);
+  }
+
+  closeFullscreen(): void {
+    this.fullscreenImageUrl.set(null);
   }
 }
