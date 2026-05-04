@@ -22,6 +22,11 @@ export class AnswersList implements OnInit {
   answers = signal<Answer[]>([]);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
+  showAddAnswerPanel = signal<boolean>(false);
+
+  newAnswerText = signal<string>('');
+  fullscreenImageUrl = signal<string | null>(null);
+  selectedAnswerImages = signal<{file: File, url: string}[]>([]);
 
   ngOnInit(): void {
     const id = Number(this.route.snapshot.paramMap.get('id'));
@@ -117,5 +122,102 @@ export class AnswersList implements OnInit {
       case 'RESOLVED': return 'Resolved';
       default: return status;
     }
+  }
+
+  openAddAnswerPanel(): void {
+    this.showAddAnswerPanel.set(true);
+    this.errorMessage.set(null);
+  }
+
+  closeAddAnswerPanel(): void {
+    this.showAddAnswerPanel.set(false);
+    this.resetAnswerForm();
+  }
+
+  resetAnswerForm(): void {
+    this.newAnswerText.set('');
+    this.selectedAnswerImages().forEach(img => URL.revokeObjectURL(img.url));
+    this.selectedAnswerImages.set([]);
+  }
+
+  postAnswer(): void {
+    const text = this.newAnswerText();
+    const q = this.question();
+
+    if (!text) {
+      this.errorMessage.set('Answer text is required.');
+      return;
+    }
+
+    if (!q) {
+      this.errorMessage.set('Question not found.');
+      return;
+    }
+
+    const newAnswer: Partial<Answer> = {
+      questionId: q.questionId,
+      text,
+      authorName: 'ion_pop'
+    };
+
+    this.isLoading.set(true);
+
+    const imagesToUpload = this.selectedAnswerImages().map(img => img.file);
+
+    const request$ = imagesToUpload.length > 0
+      ? this.answerService.createAnswerWithImages(newAnswer, imagesToUpload)
+      : this.answerService.createAnswer(newAnswer);
+
+    request$.subscribe({
+      next: (createdAnswer) => {
+        this.answers.update(answers => [...answers, createdAnswer]);
+        this.closeAddAnswerPanel();
+        this.isLoading.set(false);
+        if (q) {
+          this.loadQuestion(q.questionId);
+        }
+      },
+      error: (err) => {
+        console.error('Error creating answer:', err);
+        let errorMsg = 'Could not create answer. Please try again.';
+
+        if (err.error) {
+          errorMsg = typeof err.error === 'string' ? err.error : err.error.message || errorMsg;
+        }
+
+        this.errorMessage.set(errorMsg);
+        this.isLoading.set(false);
+      }
+    });
+  }
+
+  onAnswerImagesSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files) {
+      const filesArray = Array.from(input.files);
+      const newImages = filesArray.map(file => ({
+        file,
+        url: URL.createObjectURL(file)
+      }));
+      this.selectedAnswerImages.update(prev => [...prev, ...newImages]);
+      input.value = '';
+    }
+  }
+
+  removeAnswerImage(index: number): void {
+    this.selectedAnswerImages.update(images => {
+      const updated = [...images];
+      URL.revokeObjectURL(updated[index].url);
+      updated.splice(index, 1);
+      return updated;
+    });
+  }
+
+  openFullscreen(imageUrl: string): void {
+    this.fullscreenImageUrl.set(imageUrl);
+  }
+
+  closeFullscreen(): void {
+    this.fullscreenImageUrl.set(null);
   }
 }

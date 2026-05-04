@@ -20,10 +20,20 @@
     <div class="question-body">
       <h1 class="question-title">{{ question()!.title }}</h1>
       <p class="question-text">{{ question()!.text }}</p>
+
+      <div class="question-images" *ngIf="question()!.imageUrls && question()!.imageUrls.length > 0" style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px;">
+        <img *ngFor="let imgUrl of question()!.imageUrls"
+             [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
+             alt="Question Attached Image"
+             (click)="openFullscreen('http://localhost:8080/uploads/questions/' + imgUrl)"
+             style="max-width: 100%; max-height: 500px; border-radius: 8px; border: 1px solid #ddd; object-fit: contain; align-self: flex-start; cursor: pointer; transition: opacity 0.2s;"
+             onmouseover="this.style.opacity='0.85'"
+             onmouseout="this.style.opacity='1'">
+      </div>
     </div>
 
-    <div class="tags-container" *ngIf="question()!.tags && question()!.tags.length > 0">
-      <span class="tag" *ngFor="let tag of question()!.tags">{{ tag }}</span>
+    <div class="tags-section" *ngIf="question()!.tags && question()!.tags.length > 0">
+      <strong>Tags:</strong> {{ question()!.tags.join(', ') }}
     </div>
 
     <div class="score-section">
@@ -47,11 +57,70 @@
   </div>
 
   <div class="answers-section">
-    <h2 class="answers-title">
-      Answers
-      <span class="answers-count">({{ answers().length }})</span>
-    </h2>
+    <div class="answers-header">
+      <h2 class="answers-title">
+        Answers
+        <span class="answers-count">({{ answers().length }})</span>
+      </h2>
+      <!-- Butonul este ascuns cand panoul este deschis -->
+      <button *ngIf="!showAddAnswerPanel()" (click)="openAddAnswerPanel()" class="add-answer-btn">Add New Response</button>
+    </div>
 
+    <!-- Add Answer Panel MUTAT AICI (Sub Header, Fără Overlay) -->
+    <div class="add-answer-panel" *ngIf="showAddAnswerPanel()" style="margin-top: 15px; margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+      <div class="panel-content">
+        <h3 style="margin-top: 0;">Add New Response</h3>
+
+        <div class="error-message" *ngIf="errorMessage()">
+          {{ errorMessage() }}
+        </div>
+
+        <div class="form-group">
+          <label for="answerText">Your Answer</label>
+          <textarea
+            id="answerText"
+            [value]="newAnswerText()"
+            (input)="newAnswerText.set($any($event.target).value)"
+            placeholder="Write your answer here..."
+            rows="8"
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <label>Attachments</label>
+
+          <div class="image-previews-container" *ngIf="selectedAnswerImages().length > 0" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div *ngFor="let img of selectedAnswerImages(); let i = index" style="position: relative; display: inline-block;">
+              <img [src]="img.url" alt="Preview" style="max-height: 150px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;">
+              <button type="button" (click)="removeAnswerImage(i)" title="Remove image" style="position: absolute; top: -10px; right: -10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+                ✕
+              </button>
+            </div>
+          </div>
+
+          <div class="file-upload-actions" style="margin-bottom: 10px;">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              (change)="onAnswerImagesSelected($event)"
+              #answerFileInput
+              style="display: none;"
+            >
+            <button type="button" class="btn-add-image" (click)="answerFileInput.click()" style="padding: 8px 15px; cursor: pointer; background: #f0f2f5; border: 1px solid #ccc; border-radius: 6px;">
+              📷 Add Images
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button (click)="postAnswer()" class="post-btn">Post Answer</button>
+          <button (click)="closeAddAnswerPanel()" class="cancel-btn">Cancel</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista efectivă cu răspunsuri -->
     <div class="no-answers" *ngIf="answers().length === 0">
       <p>No answers yet. Be the first to answer!</p>
     </div>
@@ -70,6 +139,16 @@
 
       <div class="answer-body">
         <p class="answer-text">{{ answer.text }}</p>
+
+        <div class="answer-images" *ngIf="answer.imageUrls && answer.imageUrls.length > 0" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
+          <img *ngFor="let imgUrl of answer.imageUrls"
+               [src]="'http://localhost:8080/uploads/answers/' + imgUrl"
+               alt="Answer Attached Image"
+               (click)="openFullscreen('http://localhost:8080/uploads/answers/' + imgUrl)"
+               style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #ddd; object-fit: contain; cursor: pointer; transition: opacity 0.2s;"
+               onmouseover="this.style.opacity='0.85'"
+               onmouseout="this.style.opacity='1'">
+        </div>
       </div>
 
       <div class="vote-actions answer-vote-actions">
@@ -102,4 +181,23 @@
 <div class="error-container" *ngIf="errorMessage()">
   <p class="error-msg">{{ errorMessage() }}</p>
   <a routerLink="/questions" class="back-link">← Back to Questions</a>
+</div>
+
+<div class="fullscreen-overlay" *ngIf="fullscreenImageUrl()"
+     style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0, 0, 0, 0.9); z-index: 9999; display: flex; justify-content: center; align-items: center;"
+     (click)="closeFullscreen()">
+
+  <button type="button"
+          title="Închide"
+          style="position: absolute; top: 20px; left: 30px; background: transparent; color: white; border: none; font-size: 45px; cursor: pointer; z-index: 10000; padding: 0; line-height: 1; opacity: 0.8;"
+          onmouseover="this.style.opacity='1'"
+          onmouseout="this.style.opacity='0.8'"
+          (click)="closeFullscreen(); $event.stopPropagation()">
+    &times;
+  </button>
+
+  <img [src]="fullscreenImageUrl()"
+       alt="Fullscreen Image"
+       style="max-width: 90vw; max-height: 90vh; object-fit: contain; box-shadow: 0 0 25px rgba(0,0,0,0.8); border-radius: 4px;"
+       (click)="$event.stopPropagation()">
 </div>

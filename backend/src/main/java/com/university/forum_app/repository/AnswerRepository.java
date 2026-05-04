@@ -10,6 +10,7 @@ import java.util.List;
 public interface AnswerRepository extends CrudRepository<Answer, Long> {
     List<Answer> findByQuestionId(Long questionId);
 
+    long countByQuestionId(Long questionId);
 
     List<Answer> findByAuthorId(Long userId);
 
