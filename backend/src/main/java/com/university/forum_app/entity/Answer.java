@@ -31,6 +31,12 @@ public class Answer {
     @Column(name = "text")
     private String text;
 
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int likes = 0;
+
+    @Column(nullable = false, columnDefinition = "int default 0")
+    private int dislikes = 0;
+
     @CreationTimestamp
     @Column(name = "date_and_time",updatable = false)
     private LocalDateTime date;

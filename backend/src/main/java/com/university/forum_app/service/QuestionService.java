@@ -39,6 +39,7 @@ public class QuestionService {
 
     private QuestionDTO mapEntityToDTO(Question question) {
         return QuestionDTO.builder()
+                .questionId(question.getId())
                 .title(question.getTitle())
                 .text(question.getText())
                 .date(question.getDate())
@@ -160,6 +161,31 @@ public class QuestionService {
         } else {
             throw new IllegalArgumentException("No question exists with this title: '" + title + "'.");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public QuestionDTO findQuestionById(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
+        return mapEntityToDTO(question);
+    }
+
+    @Transactional
+    public QuestionDTO likeQuestion(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
+        question.setLikes(question.getLikes() + 1);
+        questionRepository.save(question);
+        return mapEntityToDTO(question);
+    }
+
+    @Transactional
+    public QuestionDTO dislikeQuestion(Long id) {
+        Question question = questionRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
+        question.setDislikes(question.getDislikes() + 1);
+        questionRepository.save(question);
+        return mapEntityToDTO(question);
     }
 
     @Transactional(readOnly = true)
