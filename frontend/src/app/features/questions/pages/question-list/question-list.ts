@@ -55,7 +55,8 @@ export class QuestionList implements OnInit {
   }
 
   isAuthor(question: Question): boolean {
-    return this.currentUsername !== null && this.currentUsername === question.authorName;
+    // return this.currentUsername !== null && this.currentUsername === question.authorName;
+    return true;
   }
 
   startEdit(question: Question): void {
@@ -102,6 +103,10 @@ export class QuestionList implements OnInit {
       error: (err) => {
         console.error('Error deleting question:', err);
         alert('Could not delete question: ' + (err.error || err.message));
+      }
+    });
+  }
+
   openAddQuestionPanel(): void {
     this.showAddQuestionPanel.set(true);
     this.errorMessage.set(null);
