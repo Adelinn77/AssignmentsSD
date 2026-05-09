@@ -144,49 +144,78 @@
       <p>No answers yet. Be the first to answer!</p>
     </div>
 
-    <div class="answer-card" *ngFor="let answer of answers(); let i = index">
-      <div class="answer-header">
-        <div class="answer-author-section">
-          <div class="answer-avatar">{{ answer.authorName.charAt(0).toUpperCase() || '?' }}</div>
-          <div class="answer-author-info">
-            <span class="answer-author-name">{{ answer.authorName || 'Anonymous' }}</span>
-            <span class="answer-date">{{ answer.dateTime | date:'dd MMM yyyy, HH:mm' }}</span>
+    <ng-container *ngFor="let answer of answers(); let i = index">
+
+      <!-- Edit mode for this answer -->
+      <div class="answer-card" *ngIf="editingAnswer()?.answerId === answer.answerId; else viewAnswer">
+        <div class="edit-form">
+          <label>Text</label>
+          <textarea class="edit-textarea"
+                    [ngModel]="editAnswerText()" (ngModelChange)="editAnswerText.set($event)"
+                    placeholder="Text" rows="4"></textarea>
+          <div class="edit-actions">
+            <button class="btn-save" (click)="saveEditAnswer()" [id]="'btn-save-answer-' + answer.answerId">Save</button>
+            <button class="btn-cancel" (click)="cancelEditAnswer()" [id]="'btn-cancel-answer-' + answer.answerId">Cancel</button>
           </div>
         </div>
-        <span class="answer-number">#{{ i + 1 }}</span>
       </div>
 
-      <div class="answer-body">
-        <p class="answer-text">{{ answer.text }}</p>
+      <!-- Normal view for this answer -->
+      <ng-template #viewAnswer>
+        <div class="answer-card">
+          <div class="answer-header">
+            <div class="answer-author-section">
+              <div class="answer-avatar">{{ answer.authorName.charAt(0).toUpperCase() || '?' }}</div>
+              <div class="answer-author-info">
+                <span class="answer-author-name">{{ answer.authorName || 'Anonymous' }}</span>
+                <span class="answer-date">{{ answer.dateTime | date:'dd MMM yyyy, HH:mm' }}</span>
+              </div>
+            </div>
+            <span class="answer-number">#{{ i + 1 }}</span>
+          </div>
 
-        <div class="answer-images" *ngIf="answer.imageUrls && answer.imageUrls.length > 0" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
-          <img *ngFor="let imgUrl of answer.imageUrls"
-               [src]="'http://localhost:8080/uploads/answers/' + imgUrl"
-               alt="Answer Attached Image"
-               (click)="openFullscreen('http://localhost:8080/uploads/answers/' + imgUrl)"
-               style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #ddd; object-fit: contain; cursor: pointer; transition: opacity 0.2s;"
-               onmouseover="this.style.opacity='0.85'"
-               onmouseout="this.style.opacity='1'">
+          <div class="answer-body">
+            <p class="answer-text">{{ answer.text }}</p>
+
+            <div class="answer-images" *ngIf="answer.imageUrls && answer.imageUrls.length > 0" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
+              <img *ngFor="let imgUrl of answer.imageUrls"
+                   [src]="'http://localhost:8080/uploads/answers/' + imgUrl"
+                   alt="Answer Attached Image"
+                   (click)="openFullscreen('http://localhost:8080/uploads/answers/' + imgUrl)"
+                   style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #ddd; object-fit: contain; cursor: pointer; transition: opacity 0.2s;"
+                   onmouseover="this.style.opacity='0.85'"
+                   onmouseout="this.style.opacity='1'">
+            </div>
+          </div>
+
+          <div class="vote-actions answer-vote-actions">
+            <button class="vote-btn like-btn" (click)="likeAnswer(answer.answerId)" [id]="'btn-like-answer-' + answer.answerId">
+              <span class="vote-icon">👍</span>
+              <span class="vote-count">{{ answer.likes }}</span>
+            </button>
+            <button class="vote-btn dislike-btn" (click)="dislikeAnswer(answer.answerId)" [id]="'btn-dislike-answer-' + answer.answerId">
+              <span class="vote-icon">👎</span>
+              <span class="vote-count">{{ answer.dislikes }}</span>
+            </button>
+            <div class="answer-score">
+              <span class="score-label">Score:</span>
+              <span class="score-value" [ngClass]="{'positive': answer.likes - answer.dislikes > 0, 'negative': answer.likes - answer.dislikes < 0}">
+                {{ answer.likes - answer.dislikes }}
+              </span>
+            </div>
+          </div>
+
+          <ng-container *ngIf="isAnswerAuthor(answer)">
+            <div class="author-actions">
+              <button class="btn-edit" (click)="startEditAnswer(answer)" [id]="'btn-edit-answer-' + answer.answerId">Edit</button>
+              <button class="btn-delete" (click)="deleteAnswer(answer)" [id]="'btn-delete-answer-' + answer.answerId">Delete</button>
+            </div>
+          </ng-container>
         </div>
-      </div>
+      </ng-template>
 
-      <div class="vote-actions answer-vote-actions">
-        <button class="vote-btn like-btn" (click)="likeAnswer(answer.answerId)" [id]="'btn-like-answer-' + answer.answerId">
-          <span class="vote-icon">👍</span>
-          <span class="vote-count">{{ answer.likes }}</span>
-        </button>
-        <button class="vote-btn dislike-btn" (click)="dislikeAnswer(answer.answerId)" [id]="'btn-dislike-answer-' + answer.answerId">
-          <span class="vote-icon">👎</span>
-          <span class="vote-count">{{ answer.dislikes }}</span>
-        </button>
-        <div class="answer-score">
-          <span class="score-label">Score:</span>
-          <span class="score-value" [ngClass]="{'positive': answer.likes - answer.dislikes > 0, 'negative': answer.likes - answer.dislikes < 0}">
-            {{ answer.likes - answer.dislikes }}
-          </span>
-        </div>
-      </div>
-    </div>
+    </ng-container>
+
 
   </div>
 
