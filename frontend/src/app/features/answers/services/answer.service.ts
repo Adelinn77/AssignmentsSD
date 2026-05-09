@@ -27,6 +27,14 @@ export class AnswerService {
     return this.http.post<Answer>(this.apiUrl, answer);
   }
 
+  updateAnswer(id: number, answer: Partial<Answer>): Observable<Answer> {
+    return this.http.put<Answer>(`${this.apiUrl}/${id}`, answer);
+  }
+
+  deleteAnswer(id: number): Observable<string> {
+    return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' });
+  }
+
   createAnswerWithImages(answer: Partial<Answer>, images: File[]): Observable<Answer> {
     const formData = new FormData();
 

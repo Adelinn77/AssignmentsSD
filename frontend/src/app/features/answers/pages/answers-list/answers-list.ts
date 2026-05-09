@@ -36,6 +36,10 @@ export class AnswersList implements OnInit {
   editTitle = signal<string>('');
   editText = signal<string>('');
 
+  // Answer edit state
+  editingAnswer = signal<Answer | null>(null);
+  editAnswerText = signal<string>('');
+
   currentUsername = this.authService.getCurrentUsername();
 
   ngOnInit(): void {
@@ -108,6 +112,57 @@ export class AnswersList implements OnInit {
   dislikeQuestion(): void {
     const q = this.question();
     if (q) this.questionService.dislikeQuestion(q.questionId).subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
+  }
+
+  isAnswerAuthor(answer: Answer): boolean {
+    // return this.currentUsername !== null && this.currentUsername === answer.authorName;
+    return true;
+  }
+
+  startEditAnswer(answer: Answer): void {
+    this.editingAnswer.set(answer);
+    this.editAnswerText.set(answer.text);
+  }
+
+  cancelEditAnswer(): void {
+    this.editingAnswer.set(null);
+  }
+
+  saveEditAnswer(): void {
+    const original = this.editingAnswer();
+    if (!original) return;
+
+    const updated: Partial<Answer> = {
+      ...original,
+      text: this.editAnswerText()
+    };
+
+    this.answerService.updateAnswer(original.answerId, updated).subscribe({
+      next: (savedAnswer) => {
+        this.answers.update(list =>
+          list.map(a => a.answerId === original.answerId ? savedAnswer : a)
+        );
+        this.editingAnswer.set(null);
+      },
+      error: (err) => {
+        console.error('Error updating answer:', err);
+        alert('Could not update answer: ' + (err.error || err.message));
+      }
+    });
+  }
+
+  deleteAnswer(answer: Answer): void {
+    if (!confirm('Are you sure you want to delete this answer?')) return;
+
+    this.answerService.deleteAnswer(answer.answerId).subscribe({
+      next: () => {
+        this.answers.update(list => list.filter(a => a.answerId !== answer.answerId));
+      },
+      error: (err) => {
+        console.error('Error deleting answer:', err);
+        alert('Could not delete answer: ' + (err.error || err.message));
+      }
+    });
   }
 
   likeAnswer(answerId: number): void {
