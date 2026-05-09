@@ -1,10 +1,20 @@
 <div class="questions-container">
   <div class="header-section">
     <h2>Questions List</h2>
-    <button *ngIf="!showAddQuestionPanel()" (click)="openAddQuestionPanel()" class="add-question-btn">Add New Question</button>
+    <button
+      *ngIf="!showAddQuestionPanel()"
+      (click)="openAddQuestionPanel()"
+      class="add-question-btn"
+    >
+      Add New Question
+    </button>
   </div>
 
-  <div class="add-question-panel" *ngIf="showAddQuestionPanel()" style="margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+  <div
+    class="add-question-panel"
+    *ngIf="showAddQuestionPanel()"
+    style="margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
+  >
     <div class="panel-content">
       <h3 style="margin-top: 0;">Add New Question</h3>
 
@@ -48,10 +58,27 @@
       <div class="form-group">
         <label>Attachments</label>
 
-        <div class="image-previews-container" *ngIf="selectedImages().length > 0" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-          <div *ngFor="let img of selectedImages(); let i = index" style="position: relative; display: inline-block;">
-            <img [src]="img.url" alt="Preview" style="max-height: 200px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;">
-            <button type="button" (click)="removeImage(i)" title="Remove image" style="position: absolute; top: -10px; right: -10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);">
+        <div
+          class="image-previews-container"
+          *ngIf="selectedImages().length > 0"
+          style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;"
+        >
+          <div
+            *ngFor="let img of selectedImages(); let i = index"
+            style="position: relative; display: inline-block;"
+          >
+            <img
+              [src]="img.url"
+              alt="Preview"
+              style="max-height: 200px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;"
+            />
+
+            <button
+              type="button"
+              (click)="removeImage(i)"
+              title="Remove image"
+              style="position: absolute; top: -10px; right: -10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
+            >
               ✕
             </button>
           </div>
@@ -65,8 +92,14 @@
             (change)="onImagesSelected($event)"
             #fileInput
             style="display: none;"
+          />
+
+          <button
+            type="button"
+            class="btn-add-image"
+            (click)="fileInput.click()"
+            style="padding: 8px 15px; cursor: pointer; background: #f0f2f5; border: 1px solid #ccc; border-radius: 6px;"
           >
-          <button type="button" class="btn-add-image" (click)="fileInput.click()" style="padding: 8px 15px; cursor: pointer; background: #f0f2f5; border: 1px solid #ccc; border-radius: 6px;">
             📷 Add Images
           </button>
         </div>
@@ -76,6 +109,79 @@
         <button (click)="postQuestion()" class="post-btn">Post Question</button>
         <button (click)="closeAddQuestionPanel()" class="cancel-btn">Cancel</button>
       </div>
+    </div>
+  </div>
+
+  <div
+    class="filters-panel"
+    style="margin-bottom: 20px; padding: 16px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);"
+  >
+    <div
+      class="filters-grid"
+      style="display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 15px; align-items: end;"
+    >
+      <div class="form-group">
+        <label for="searchTitle">Search by title</label>
+        <input
+          id="searchTitle"
+          type="text"
+          [value]="searchTitle()"
+          (input)="updateSearchTitle($any($event.target).value)"
+          placeholder="Search question title..."
+        />
+      </div>
+
+      <div class="form-group">
+        <label for="selectedTag">Filter by tag</label>
+        <select
+          id="selectedTag"
+          [value]="selectedTag()"
+          (change)="updateSelectedTag($any($event.target).value)"
+        >
+          <option value="">All tags</option>
+          <option *ngFor="let tag of allTags()" [value]="tag">
+            {{ tag }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="selectedUser">Filter by user</label>
+        <select
+          id="selectedUser"
+          [value]="selectedUser()"
+          (change)="updateSelectedUser($any($event.target).value)"
+        >
+          <option value="">All users</option>
+          <option *ngFor="let user of allUsers()" [value]="user">
+            {{ user }}
+          </option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+          <input
+            type="checkbox"
+            [checked]="onlyMyQuestions()"
+            (change)="updateOnlyMyQuestions($any($event.target).checked)"
+          />
+          My questions only
+        </label>
+
+        <button
+          type="button"
+          class="cancel-btn"
+          (click)="resetFilters()"
+          style="margin-top: 8px;"
+        >
+          Reset Filters
+        </button>
+      </div>
+    </div>
+
+    <div style="margin-top: 10px; color: #555;">
+      Showing {{ filteredQuestions().length }} of {{ questions().length }} questions
     </div>
   </div>
 
@@ -89,84 +195,139 @@
       <th class="text-center">Actions</th>
     </tr>
     </thead>
-    <tbody>
-<ng-container *ngFor="let question of questions()">
 
-      <!-- Edit row -->
+    <tbody>
+    <ng-container *ngFor="let question of filteredQuestions()">
       <tr *ngIf="editingQuestion()?.questionId === question.questionId; else viewRow">
         <td class="question-content" colspan="4">
           <div class="edit-form">
-            <input class="edit-input" type="text"
-                   [ngModel]="editTitle()" (ngModelChange)="editTitle.set($event)"
-                   placeholder="Title" />
-            <textarea class="edit-textarea"
-                      [ngModel]="editText()" (ngModelChange)="editText.set($event)"
-                      placeholder="Text" rows="3"></textarea>
+            <input
+              class="edit-input"
+              type="text"
+              [ngModel]="editTitle()"
+              (ngModelChange)="editTitle.set($event)"
+              placeholder="Title"
+            />
+
+            <textarea
+              class="edit-textarea"
+              [ngModel]="editText()"
+              (ngModelChange)="editText.set($event)"
+              placeholder="Text"
+              rows="3"
+            ></textarea>
+
             <div class="edit-actions">
-              <button class="btn-save" (click)="saveEdit()" id="btn-save-edit">Save</button>
-              <button class="btn-cancel" (click)="cancelEdit()" id="btn-cancel-edit">Cancel</button>
+              <button
+                class="btn-save"
+                (click)="saveEdit()"
+                id="btn-save-edit"
+              >
+                Save
+              </button>
+
+              <button
+                class="btn-cancel"
+                (click)="cancelEdit()"
+                id="btn-cancel-edit"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </td>
         <td></td>
       </tr>
 
-  <!-- Normal view row -->
-  <ng-template #viewRow>
-    <tr>
-      <!-- 1. Subject -->
-      <td class="question-content">
-        <a [routerLink]="['/answers/question', question.questionId]" class="question-title-link">
-          {{ question.title }}
-        </a>
-        <div class="question-images-preview" *ngIf="question.imageUrls && question.imageUrls.length > 0" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;">
-          <img *ngFor="let imgUrl of question.imageUrls"
-               [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
-               alt="Question Image"
-               style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #eaeaea; object-fit: contain;">
-        </div>
-        <div class="text-preview" style="margin-top: 10px;">{{ question.text }}</div>
-      </td>
+      <ng-template #viewRow>
+        <tr>
+          <td class="question-content">
+            <a
+              [routerLink]="['/answers/question', question.questionId]"
+              class="question-title-link"
+            >
+              {{ question.title }}
+            </a>
 
-      <!-- 2. Author -->
-      <td class="author-info">
-        <a [routerLink]="['/users', question.authorName]" class="author-link">
-          {{ question.authorName }}
-        </a>
-      </td>
+            <div
+              class="question-images-preview"
+              *ngIf="question.imageUrls && question.imageUrls.length > 0"
+              style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;"
+            >
+              <img
+                *ngFor="let imgUrl of question.imageUrls"
+                [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
+                alt="Question Image"
+                style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #eaeaea; object-fit: contain;"
+              />
+            </div>
 
-      <!-- 3. Author Score (COLOANA ADĂUGATĂ PENTRU ALINIERE) -->
-      <td class="text-center">
-        <!-- Pune aici variabila corectă dacă o ai, ex: {{ question.authorScore }} -->
-        -
-      </td>
+            <div class="text-preview" style="margin-top: 10px;">
+              {{ question.text }}
+            </div>
 
-      <!-- 4. Feedback -->
-      <td class="text-center">
-        <div class="feedback-actions">
-          <span class="likes">👍 {{ question.likes }}</span>
-          <span class="dislikes">👎 {{ question.dislikes }}</span>
-        </div>
-      </td>
+            <div
+              class="question-tags"
+              *ngIf="question.tags && question.tags.length > 0"
+              style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;"
+            >
+                <span
+                  *ngFor="let tag of question.tags"
+                  style="padding: 3px 8px; background: #eef2ff; border-radius: 12px; font-size: 12px;"
+                >
+                  {{ tag }}
+                </span>
+            </div>
+          </td>
 
-      <!-- 5. Actions -->
-      <td class="text-center">
-        <ng-container *ngIf="isAuthor(question)">
-          <button class="btn-edit" (click)="startEdit(question)"
-                  [id]="'btn-edit-' + question.questionId">Edit</button>
-          <button class="btn-delete" (click)="deleteQuestion(question)"
-                  [id]="'btn-delete-' + question.questionId">Delete</button>
-        </ng-container>
+          <td class="author-info">
+            <a
+              [routerLink]="['/users', question.authorName]"
+              class="author-link"
+            >
+              {{ question.authorName }}
+            </a>
+          </td>
+
+          <td class="text-center">
+            -
+          </td>
+
+          <td class="text-center">
+            <div class="feedback-actions">
+              <span class="likes">👍 {{ question.likes }}</span>
+              <span class="dislikes">👎 {{ question.dislikes }}</span>
+            </div>
+          </td>
+
+          <td class="text-center">
+            <ng-container *ngIf="isAuthor(question)">
+              <button
+                class="btn-edit"
+                (click)="startEdit(question)"
+                [id]="'btn-edit-' + question.questionId"
+              >
+                Edit
+              </button>
+
+              <button
+                class="btn-delete"
+                (click)="deleteQuestion(question)"
+                [id]="'btn-delete-' + question.questionId"
+              >
+                Delete
+              </button>
+            </ng-container>
+          </td>
+        </tr>
+      </ng-template>
+    </ng-container>
+
+    <tr *ngIf="filteredQuestions().length === 0">
+      <td colspan="5" class="text-center" style="padding: 20px;">
+        No questions found.
       </td>
     </tr>
-  </ng-template>
-
-    </ng-container>
     </tbody>
   </table>
 </div>
-
-
-
-
-
