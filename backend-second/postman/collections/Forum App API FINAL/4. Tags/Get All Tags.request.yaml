@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Tags
+url: http://localhost:8080/api/tags
+method: GET
+order: 1131918514711956

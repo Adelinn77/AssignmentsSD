@@ -1,0 +1,220 @@
+package com.university.forum_app.service;
+
+import com.university.forum_app.dto.AnswerDTO;
+import com.university.forum_app.entity.Answer;
+import com.university.forum_app.entity.AnswerImage;
+import com.university.forum_app.entity.Question;
+import com.university.forum_app.entity.Status;
+import com.university.forum_app.entity.User;
+import com.university.forum_app.repository.AnswerRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+@Service
+public class AnswerService {
+
+    @Autowired
+    private AnswerRepository answerRepo;
+
+    @Autowired
+    private com.university.forum_app.repository.UserRepository userRepository;
+
+    @Autowired
+    private com.university.forum_app.repository.QuestionRepository questionRepository;
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @Value("${app.upload.dir.answers:uploads/answers}")
+    private String uploadDir;
+
+    private AnswerDTO mapEntityToDTO(Answer answer) {
+        return AnswerDTO.builder()
+                .answerId(answer.getId())
+                .questionId(answer.getQuestion() != null ? answer.getQuestion().getId() : null)
+                .userId(answer.getAuthor() != null ? answer.getAuthor().getId() : null)
+                .authorName(answer.getAuthor() != null ? answer.getAuthor().getUsername() : null)
+                .text(answer.getText())
+                .likes(answer.getLikes())
+                .dislikes(answer.getDislikes())
+                .dateTime(answer.getDate())
+                .imageUrls(answer.getImages() != null
+                        ? answer.getImages().stream().map(AnswerImage::getImageUrl).toList()
+                        : new ArrayList<String>())
+                .build();
+    }
+
+    private Answer mapDTOToEntity(AnswerDTO answerDTO) {
+        User author = null;
+        if (answerDTO.getAuthorName() != null) {
+            author = userRepository.findByUsername(answerDTO.getAuthorName());
+            if (author == null) {
+                throw new IllegalArgumentException("Author with username '" + answerDTO.getAuthorName() + "' doesn't exist.");
+            }
+        }
+
+        Question question = null;
+        if (answerDTO.getQuestionId() != null) {
+            question = questionRepository.findById(answerDTO.getQuestionId())
+                    .orElseThrow(() -> new IllegalArgumentException("Question with id '" + answerDTO.getQuestionId() + "' doesn't exist."));
+        }
+
+        return Answer.builder()
+                .id(answerDTO.getAnswerId())
+                .text(answerDTO.getText())
+                .author(author)
+                .question(question)
+                .date(answerDTO.getDateTime())
+                .build();
+    }
+
+    private String saveImageToDisk(MultipartFile file) {
+        try {
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            String uniqueFilename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(uniqueFilename);
+
+            Files.copy(file.getInputStream(), filePath);
+
+            return uniqueFilename;
+
+        } catch (IOException e) {
+            throw new RuntimeException("Couldn't save image: " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public AnswerDTO saveAnswerWithImages(AnswerDTO answerDTO, List<MultipartFile> imageFiles) {
+        Answer newAnswer = mapDTOToEntity(answerDTO);
+
+        if (imageFiles != null && !imageFiles.isEmpty()) {
+            List<AnswerImage> answerImages = new ArrayList<>();
+
+            for (MultipartFile file : imageFiles) {
+                if (!file.isEmpty()) {
+                    String imageUrl = saveImageToDisk(file);
+
+                    AnswerImage answerImage = new AnswerImage();
+                    answerImage.setImageUrl(imageUrl);
+                    answerImage.setAnswer(newAnswer);
+
+                    answerImages.add(answerImage);
+                }
+            }
+            newAnswer.setImages(answerImages);
+        }
+
+        Answer savedAnswer = answerRepo.save(newAnswer);
+        updateQuestionStatusIfFirstAnswer(savedAnswer.getQuestion());
+        return mapEntityToDTO(savedAnswer);
+    }
+
+    @Transactional
+    public AnswerDTO saveAnswer(AnswerDTO answerDTO) {
+        Answer answer = mapDTOToEntity(answerDTO);
+        Answer savedAnswer = answerRepo.save(answer);
+        updateQuestionStatusIfFirstAnswer(savedAnswer.getQuestion());
+        return mapEntityToDTO(savedAnswer);
+    }
+
+    @Transactional
+    public AnswerDTO updateAnswer(AnswerDTO updatedAnswer) {
+        Answer answer = answerRepo.findById(updatedAnswer.getAnswerId())
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No answer exists with id: '" + updatedAnswer.getAnswerId() + "'."));
+
+        Answer mappedData = mapDTOToEntity(updatedAnswer);
+        answer.setText(mappedData.getText());
+        answerRepo.save(answer);
+        return mapEntityToDTO(answer);
+    }
+
+    @Transactional
+    public void deleteAnswerById(Long id) {
+        if (answerRepo.existsById(id)) {
+            answerRepo.deleteById(id);
+        } else {
+            throw new IllegalArgumentException("No answer exists with id: '" + id + "'.");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public AnswerDTO findAnswerById(Long id) {
+        Answer answer = answerRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No answer exists with id: '" + id + "'."));
+        return mapEntityToDTO(answer);
+    }
+
+    @Transactional(readOnly = true)
+    public List<AnswerDTO> findAnswersByAuthorId(Long userId) {
+        List<Answer> answers = answerRepo.findByAuthorId(userId);
+        return answers.stream().map(this::mapEntityToDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AnswerDTO> findAnswersByQuestionId(Long questionId) {
+        List<Answer> answers = answerRepo.findByQuestionId(questionId);
+        return answers.stream().map(this::mapEntityToDTO).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AnswerDTO> findAllAnswers() {
+        List<Answer> answers = new ArrayList<>();
+        answerRepo.findAll().forEach(answers::add);
+        return answers.stream().map(this::mapEntityToDTO).toList();
+    }
+
+    @Transactional
+    public AnswerDTO likeAnswer(Long id) {
+        Answer answer = answerRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No answer exists with id: '" + id + "'."));
+        answer.setLikes(answer.getLikes() + 1);
+        answerRepo.save(answer);
+        return mapEntityToDTO(answer);
+    }
+
+    @Transactional
+    public AnswerDTO dislikeAnswer(Long id) {
+        Answer answer = answerRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No answer exists with id: '" + id + "'."));
+        answer.setDislikes(answer.getDislikes() + 1);
+        answerRepo.save(answer);
+        return mapEntityToDTO(answer);
+    }
+
+    private void updateQuestionStatusIfFirstAnswer(Question question) {
+        if (question != null) {
+            entityManager.flush(); // Ensure the answer is persisted before counting
+
+            Question managedQuestion = questionRepository.findById(question.getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Question not found"));
+
+            if (managedQuestion.getStatus() == Status.RECEIVED) {
+                long answerCount = answerRepo.countByQuestionId(managedQuestion.getId());
+                if (answerCount == 1) {
+                    managedQuestion.setStatus(Status.IN_PROGRESS);
+                    questionRepository.save(managedQuestion);
+                    entityManager.flush(); // Ensure the status change is persisted
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get All Questions
+url: http://localhost:8080/api/questions
+method: GET
+order: 4000

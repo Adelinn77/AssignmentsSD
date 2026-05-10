@@ -1,6 +1,8 @@
 server:
-  port: 8080
+  port: 8081
 spring:
+  application:
+    name: backend-second
   datasource:
     url: jdbc:mysql://localhost:3306/forum-app?createDatabaseIfNotExist=true
     username: root

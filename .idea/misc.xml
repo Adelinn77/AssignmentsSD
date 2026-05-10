@@ -6,6 +6,7 @@
       <list>
         <option value="$PROJECT_DIR$/forum-app/pom.xml" />
         <option value="$PROJECT_DIR$/backend/pom.xml" />
+        <option value="$PROJECT_DIR$/backend-second/pom.xml" />
       </list>
     </option>
   </component>

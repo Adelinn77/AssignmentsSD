@@ -1,0 +1,13 @@
+$kind: http-request
+name: Create Tag
+url: http://localhost:8080/api/tags
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "label": "terraform"
+    }
+order: 1775085855737

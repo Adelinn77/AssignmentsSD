@@ -1,0 +1,13 @@
+$kind: http-request
+url: http://localhost:8080/api/answers
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "questionId": 2,
+      "userId": 1
+    }
+order: 2000
