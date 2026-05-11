@@ -1,0 +1,16 @@
+$kind: http-request
+url: http://localhost:8080/api/questions/title/React_vs_Angular
+method: PUT
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "title": "React_vs_Angular_Updated",
+      "text": "Ce folositi in 2026?",
+      "authorName": "alicesmith",
+      "tags": ["java", "spring"],
+      "status": "RESOLVED"
+    }
+order: 6000

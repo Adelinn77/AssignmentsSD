@@ -1,0 +1,5 @@
+$kind: http-request
+name: Get Tag by Name
+url: http://localhost:8080/api/tags/label/docker
+method: GET
+order: 1954044628507297

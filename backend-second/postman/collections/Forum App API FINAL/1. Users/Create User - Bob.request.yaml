@@ -1,0 +1,16 @@
+$kind: http-request
+url: http://localhost:8080/api/users
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: text
+  content: |-
+    {
+      "username": "bobbrown",
+      "email": "bob@example.com",
+      "phone": "0733333333",
+      "firstName": "Bob",
+      "lastName": "Brown"
+    }
+order: 3000
