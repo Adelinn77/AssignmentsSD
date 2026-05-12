@@ -23,6 +23,9 @@ public class QuestionDTO {
     private LocalDateTime date;
     private Status status;
 
+    private String currentUserVote;
+
+
     private String authorName;
 
     private List<String> tags;

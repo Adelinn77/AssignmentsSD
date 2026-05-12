@@ -11,12 +11,14 @@ export class QuestionService {
   private apiUrl = `${environment.apiUrl}/questions`;
   private http = inject(HttpClient);
 
-  getAllQuestions(): Observable<Question[]> {
-    return this.http.get<Question[]>(this.apiUrl);
+  getAllQuestions(viewer?: string): Observable<Question[]> {
+    const url = viewer ? `${this.apiUrl}?viewer=${encodeURIComponent(viewer)}` : this.apiUrl;
+    return this.http.get<Question[]>(url);
   }
 
-  getQuestionById(id: number): Observable<Question> {
-    return this.http.get<Question>(`${this.apiUrl}/${id}`);
+  getQuestionById(id: number, viewer?: string): Observable<Question> {
+    const url = viewer ? `${this.apiUrl}/${id}?viewer=${encodeURIComponent(viewer)}` : `${this.apiUrl}/${id}`;
+    return this.http.get<Question>(url);
   }
 
   getQuestionsByAuthor(username: string): Observable<Question[]> {
@@ -31,12 +33,12 @@ export class QuestionService {
     return this.http.delete(`${this.apiUrl}/title/${encodeURIComponent(title)}`, { responseType: 'text' });
   }
 
-  likeQuestion(id: number): Observable<Question> {
-    return this.http.put<Question>(`${this.apiUrl}/${id}/like`, {});
+  likeQuestion(id: number, username: string): Observable<Question> {
+    return this.http.put<Question>(`${this.apiUrl}/${id}/like?username=${encodeURIComponent(username)}`, {});
   }
 
-  dislikeQuestion(id: number): Observable<Question> {
-    return this.http.put<Question>(`${this.apiUrl}/${id}/dislike`, {});
+  dislikeQuestion(id: number, username: string): Observable<Question> {
+    return this.http.put<Question>(`${this.apiUrl}/${id}/dislike?username=${encodeURIComponent(username)}`, {});
   }
 
   createQuestion(question: Partial<Question>): Observable<Question> {

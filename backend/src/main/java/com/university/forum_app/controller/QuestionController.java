@@ -41,8 +41,8 @@ public class QuestionController {
     }
 
     @GetMapping
-    public ResponseEntity<List<QuestionDTO>> getAllQuestions() {
-        List<QuestionDTO> questions = questionService.findAllQuestions();
+    public ResponseEntity<List<QuestionDTO>> getAllQuestions(@RequestParam(required = false) String viewer) {
+        List<QuestionDTO> questions = questionService.findAllQuestions(viewer);
         return new ResponseEntity<>(questions, HttpStatus.OK);
     }
 
@@ -89,9 +89,9 @@ public class QuestionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Object> getQuestionById(@PathVariable Long id) {
+    public ResponseEntity<Object> getQuestionById(@PathVariable Long id, @RequestParam(required = false) String viewer) {
         try {
-            QuestionDTO question = questionService.findQuestionById(id);
+            QuestionDTO question = questionService.findQuestionById(id, viewer);
             return new ResponseEntity<>(question, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -99,9 +99,9 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}/like")
-    public ResponseEntity<Object> likeQuestion(@PathVariable Long id) {
+    public ResponseEntity<Object> likeQuestion(@PathVariable Long id, @RequestParam String username) {
         try {
-            QuestionDTO question = questionService.likeQuestion(id);
+            QuestionDTO question = questionService.likeQuestion(id, username);
             return new ResponseEntity<>(question, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -109,9 +109,9 @@ public class QuestionController {
     }
 
     @PutMapping("/{id}/dislike")
-    public ResponseEntity<Object> dislikeQuestion(@PathVariable Long id) {
+    public ResponseEntity<Object> dislikeQuestion(@PathVariable Long id, @RequestParam String username) {
         try {
-            QuestionDTO question = questionService.dislikeQuestion(id);
+            QuestionDTO question = questionService.dislikeQuestion(id, username);
             return new ResponseEntity<>(question, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);

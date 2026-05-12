@@ -107,7 +107,7 @@ export class QuestionList implements OnInit {
   loadQuestions(): void {
     this.isLoading.set(true);
 
-    this.questionService.getAllQuestions().subscribe({
+    this.questionService.getAllQuestions(this.currentUsername || undefined).subscribe({
       next: (data) => {
         this.questions.set(data);
         this.isLoading.set(false);
@@ -203,6 +203,32 @@ export class QuestionList implements OnInit {
         console.error('Error deleting question:', err);
         alert('Could not delete question: ' + (err.error || err.message));
       }
+    });
+  }
+
+  likeQuestion(question: Question): void {
+    if (!this.currentUsername) {
+      alert('You must be logged in to vote.');
+      return;
+    }
+    this.questionService.likeQuestion(question.questionId, this.currentUsername).subscribe({
+      next: (updatedQuestion) => {
+        this.questions.update(list => list.map(q => q.questionId === updatedQuestion.questionId ? updatedQuestion : q));
+      },
+      error: (err) => console.error(err)
+    });
+  }
+
+  dislikeQuestion(question: Question): void {
+    if (!this.currentUsername) {
+      alert('You must be logged in to vote.');
+      return;
+    }
+    this.questionService.dislikeQuestion(question.questionId, this.currentUsername).subscribe({
+      next: (updatedQuestion) => {
+        this.questions.update(list => list.map(q => q.questionId === updatedQuestion.questionId ? updatedQuestion : q));
+      },
+      error: (err) => console.error(err)
     });
   }
 

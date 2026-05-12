@@ -8,6 +8,8 @@ import com.university.forum_app.entity.User;
 import com.university.forum_app.repository.QuestionRepository;
 import com.university.forum_app.repository.TagRepository;
 import com.university.forum_app.repository.UserRepository;
+import com.university.forum_app.repository.QuestionVoteRepository;
+import com.university.forum_app.entity.QuestionVote;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ public class QuestionService {
     @Autowired
     private TagRepository tagRepository;
 
+    @Autowired
+    private QuestionVoteRepository questionVoteRepository;
+
     @Value("${app.upload.dir.questions:uploads/questions}")
     private String uploadDir;
 
@@ -50,6 +55,20 @@ public class QuestionService {
                 .likes(question.getLikes())
                 .dislikes(question.getDislikes())
                 .build();
+    }
+
+    private QuestionDTO mapEntityToDTO(Question question, String viewer) {
+        QuestionDTO dto = mapEntityToDTO(question);
+        if (viewer != null) {
+            User user = userRepository.findByUsername(viewer);
+            if (user != null) {
+                QuestionVote vote = questionVoteRepository.findByQuestionAndUser(question, user);
+                if (vote != null) {
+                    dto.setCurrentUserVote(vote.isLike() ? "LIKE" : "DISLIKE");
+                }
+            }
+        }
+        return dto;
     }
 
     private Question mapDTOToEntity(QuestionDTO questionDTO) {
@@ -164,35 +183,73 @@ public class QuestionService {
     }
 
     @Transactional(readOnly = true)
-    public QuestionDTO findQuestionById(Long id) {
+    public QuestionDTO findQuestionById(Long id, String viewer) {
         Question question = questionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
-        return mapEntityToDTO(question);
+        return mapEntityToDTO(question, viewer);
     }
 
     @Transactional
-    public QuestionDTO likeQuestion(Long id) {
+    public QuestionDTO likeQuestion(Long id, String username) {
         Question question = questionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
-        question.setLikes(question.getLikes() + 1);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        QuestionVote existingVote = questionVoteRepository.findByQuestionAndUser(question, user);
+        if (existingVote != null) {
+            if (existingVote.isLike()) {
+                questionVoteRepository.delete(existingVote);
+            } else {
+                existingVote.setLike(true);
+                questionVoteRepository.save(existingVote);
+            }
+        } else {
+            QuestionVote newVote = QuestionVote.builder().question(question).user(user).isLike(true).build();
+            questionVoteRepository.save(newVote);
+        }
+
+        question.setLikes((int) questionVoteRepository.countByQuestionAndIsLike(question, true));
+        question.setDislikes((int) questionVoteRepository.countByQuestionAndIsLike(question, false));
         questionRepository.save(question);
-        return mapEntityToDTO(question);
+        return mapEntityToDTO(question, username);
     }
 
     @Transactional
-    public QuestionDTO dislikeQuestion(Long id) {
+    public QuestionDTO dislikeQuestion(Long id, String username) {
         Question question = questionRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No question exists with id: '" + id + "'."));
-        question.setDislikes(question.getDislikes() + 1);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        QuestionVote existingVote = questionVoteRepository.findByQuestionAndUser(question, user);
+        if (existingVote != null) {
+            if (!existingVote.isLike()) {
+                questionVoteRepository.delete(existingVote);
+            } else {
+                existingVote.setLike(false);
+                questionVoteRepository.save(existingVote);
+            }
+        } else {
+            QuestionVote newVote = QuestionVote.builder().question(question).user(user).isLike(false).build();
+            questionVoteRepository.save(newVote);
+        }
+
+        question.setLikes((int) questionVoteRepository.countByQuestionAndIsLike(question, true));
+        question.setDislikes((int) questionVoteRepository.countByQuestionAndIsLike(question, false));
         questionRepository.save(question);
-        return mapEntityToDTO(question);
+        return mapEntityToDTO(question, username);
     }
 
     @Transactional(readOnly = true)
-    public List<QuestionDTO> findAllQuestions() {
+    public List<QuestionDTO> findAllQuestions(String viewer) {
         List<Question> questions = new ArrayList<>();
         questionRepository.findAll().forEach(questions::add);
-        return questions.stream().map(this::mapEntityToDTO).toList();
+        return questions.stream().map(q -> mapEntityToDTO(q, viewer)).toList();
     }
 
     @Transactional(readOnly = true)

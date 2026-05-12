@@ -7,6 +7,8 @@ import com.university.forum_app.entity.Question;
 import com.university.forum_app.entity.Status;
 import com.university.forum_app.entity.User;
 import com.university.forum_app.repository.AnswerRepository;
+import com.university.forum_app.repository.AnswerVoteRepository;
+import com.university.forum_app.entity.AnswerVote;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +35,9 @@ public class AnswerService {
     private com.university.forum_app.repository.UserRepository userRepository;
 
     @Autowired
+    private AnswerVoteRepository answerVoteRepository;
+
+    @Autowired
     private com.university.forum_app.repository.QuestionRepository questionRepository;
 
     @PersistenceContext
@@ -55,6 +60,20 @@ public class AnswerService {
                         ? answer.getImages().stream().map(AnswerImage::getImageUrl).toList()
                         : new ArrayList<String>())
                 .build();
+    }
+
+    private AnswerDTO mapEntityToDTO(Answer answer, String viewer) {
+        AnswerDTO dto = mapEntityToDTO(answer);
+        if (viewer != null) {
+            User user = userRepository.findByUsername(viewer);
+            if (user != null) {
+                AnswerVote vote = answerVoteRepository.findByAnswerAndUser(answer, user);
+                if (vote != null) {
+                    dto.setCurrentUserVote(vote.isLike() ? "LIKE" : "DISLIKE");
+                }
+            }
+        }
+        return dto;
     }
 
     private Answer mapDTOToEntity(AnswerDTO answerDTO) {
@@ -170,34 +189,72 @@ public class AnswerService {
     }
 
     @Transactional(readOnly = true)
-    public List<AnswerDTO> findAnswersByQuestionId(Long questionId) {
+    public List<AnswerDTO> findAnswersByQuestionId(Long questionId, String viewer) {
         List<Answer> answers = answerRepo.findByQuestionId(questionId);
-        return answers.stream().map(this::mapEntityToDTO).toList();
+        return answers.stream().map(a -> mapEntityToDTO(a, viewer)).toList();
     }
 
     @Transactional(readOnly = true)
-    public List<AnswerDTO> findAllAnswers() {
+    public List<AnswerDTO> findAllAnswers(String viewer) {
         List<Answer> answers = new ArrayList<>();
         answerRepo.findAll().forEach(answers::add);
-        return answers.stream().map(this::mapEntityToDTO).toList();
+        return answers.stream().map(a -> mapEntityToDTO(a, viewer)).toList();
     }
 
     @Transactional
-    public AnswerDTO likeAnswer(Long id) {
+    public AnswerDTO likeAnswer(Long id, String username) {
         Answer answer = answerRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No answer exists with id: '" + id + "'."));
-        answer.setLikes(answer.getLikes() + 1);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        AnswerVote existingVote = answerVoteRepository.findByAnswerAndUser(answer, user);
+        if (existingVote != null) {
+            if (existingVote.isLike()) {
+                answerVoteRepository.delete(existingVote);
+            } else {
+                existingVote.setLike(true);
+                answerVoteRepository.save(existingVote);
+            }
+        } else {
+            AnswerVote newVote = AnswerVote.builder().answer(answer).user(user).isLike(true).build();
+            answerVoteRepository.save(newVote);
+        }
+
+        answer.setLikes((int) answerVoteRepository.countByAnswerAndIsLike(answer, true));
+        answer.setDislikes((int) answerVoteRepository.countByAnswerAndIsLike(answer, false));
         answerRepo.save(answer);
-        return mapEntityToDTO(answer);
+        return mapEntityToDTO(answer, username);
     }
 
     @Transactional
-    public AnswerDTO dislikeAnswer(Long id) {
+    public AnswerDTO dislikeAnswer(Long id, String username) {
         Answer answer = answerRepo.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("No answer exists with id: '" + id + "'."));
-        answer.setDislikes(answer.getDislikes() + 1);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        AnswerVote existingVote = answerVoteRepository.findByAnswerAndUser(answer, user);
+        if (existingVote != null) {
+            if (!existingVote.isLike()) {
+                answerVoteRepository.delete(existingVote);
+            } else {
+                existingVote.setLike(false);
+                answerVoteRepository.save(existingVote);
+            }
+        } else {
+            AnswerVote newVote = AnswerVote.builder().answer(answer).user(user).isLike(false).build();
+            answerVoteRepository.save(newVote);
+        }
+
+        answer.setLikes((int) answerVoteRepository.countByAnswerAndIsLike(answer, true));
+        answer.setDislikes((int) answerVoteRepository.countByAnswerAndIsLike(answer, false));
         answerRepo.save(answer);
-        return mapEntityToDTO(answer);
+        return mapEntityToDTO(answer, username);
     }
 
     private void updateQuestionStatusIfFirstAnswer(Question question) {

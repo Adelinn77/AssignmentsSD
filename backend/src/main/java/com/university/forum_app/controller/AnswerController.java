@@ -41,8 +41,8 @@ public class AnswerController {
     }
 
     @GetMapping
-    public ResponseEntity<List<AnswerDTO>> getAllAnswers() {
-        List<AnswerDTO> answers = answerService.findAllAnswers();
+    public ResponseEntity<List<AnswerDTO>> getAllAnswers(@RequestParam(required = false) String viewer) {
+        List<AnswerDTO> answers = answerService.findAllAnswers(viewer);
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
@@ -57,8 +57,8 @@ public class AnswerController {
     }
 
     @GetMapping("/question/{questionId}")
-    public ResponseEntity<List<AnswerDTO>> getAnswersByQuestionId(@PathVariable Long questionId) {
-        List<AnswerDTO> answers = answerService.findAnswersByQuestionId(questionId);
+    public ResponseEntity<List<AnswerDTO>> getAnswersByQuestionId(@PathVariable Long questionId, @RequestParam(required = false) String viewer) {
+        List<AnswerDTO> answers = answerService.findAnswersByQuestionId(questionId, viewer);
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
@@ -91,9 +91,9 @@ public class AnswerController {
     }
 
     @PutMapping("/{id}/like")
-    public ResponseEntity<Object> likeAnswer(@PathVariable Long id) {
+    public ResponseEntity<Object> likeAnswer(@PathVariable Long id, @RequestParam String username) {
         try {
-            AnswerDTO answer = answerService.likeAnswer(id);
+            AnswerDTO answer = answerService.likeAnswer(id, username);
             return new ResponseEntity<>(answer, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
@@ -101,9 +101,9 @@ public class AnswerController {
     }
 
     @PutMapping("/{id}/dislike")
-    public ResponseEntity<Object> dislikeAnswer(@PathVariable Long id) {
+    public ResponseEntity<Object> dislikeAnswer(@PathVariable Long id, @RequestParam String username) {
         try {
-            AnswerDTO answer = answerService.dislikeAnswer(id);
+            AnswerDTO answer = answerService.dislikeAnswer(id, username);
             return new ResponseEntity<>(answer, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
