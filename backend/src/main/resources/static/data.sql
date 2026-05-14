@@ -1,4 +1,8 @@
 -- 1. USERS
+# CREATE DATABASE IF NOT EXISTS forum_app;
+# USE forum_app;
+
+
 INSERT INTO users (first_name, last_name, email, phone, username, password, role, access_restricted)
 VALUES
     ('Ion', 'Popescu', 'ion.popescu@email.com', '0722111222', 'ion_pop', '$2a$10$D8bTq1Xb.Fj.v4L2y8c.1e1zQ5j3Xk9xQ5j3Xk9xQ5j3Xk9xQ5j3X', 0, FALSE),
