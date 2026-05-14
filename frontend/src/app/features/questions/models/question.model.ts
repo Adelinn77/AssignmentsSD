@@ -15,4 +15,5 @@ export interface Question {
   authorName: string;
   tags: string[];
   imageUrls: string[];
+  currentUserVote?: string;
 }

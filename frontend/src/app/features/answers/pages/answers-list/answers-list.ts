@@ -52,7 +52,7 @@ export class AnswersList implements OnInit {
 
   loadQuestion(id: number): void {
     this.isLoading.set(true);
-    this.questionService.getQuestionById(id).subscribe({
+    this.questionService.getQuestionById(id, this.currentUsername || undefined).subscribe({
       next: (data) => { this.question.set(data); this.isLoading.set(false); },
       error: (err) => {
         console.error('Error fetching question:', err);
@@ -63,7 +63,7 @@ export class AnswersList implements OnInit {
   }
 
   loadAnswers(questionId: number): void {
-    this.answerService.getAnswersByQuestionId(questionId).subscribe({
+    this.answerService.getAnswersByQuestionId(questionId, this.currentUsername || undefined).subscribe({
       next: (data) => { this.answers.set(data); },
       error: (err) => { console.error('Error fetching answers:', err); }
     });
@@ -106,12 +106,21 @@ export class AnswersList implements OnInit {
 
   likeQuestion(): void {
     const q = this.question();
-    if (q) this.questionService.likeQuestion(q.questionId).subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
+    if (!q) return;
+    ///TODO: Uncomment this line after login implementation
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    // change ion_pop to this.currentUsername
+    this.questionService.likeQuestion(q.questionId, "ion_pop").subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
   }
 
   dislikeQuestion(): void {
     const q = this.question();
-    if (q) this.questionService.dislikeQuestion(q.questionId).subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
+    if (!q) return;
+
+    ///TODO: Uncomment this line after login implementation
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    // change ion_pop to this.currentUsername
+    this.questionService.dislikeQuestion(q.questionId, "ion_pop").subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
   }
 
   isAnswerAuthor(answer: Answer): boolean {
@@ -166,14 +175,20 @@ export class AnswersList implements OnInit {
   }
 
   likeAnswer(answerId: number): void {
-    this.answerService.likeAnswer(answerId).subscribe({
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    ///TODO: Uncomment this line after login implementation
+    // change ion_pop to this.currentUsername
+    this.answerService.likeAnswer(answerId, "ion_pop").subscribe({
       next: (u) => { this.answers.update(list => list.map(a => a.answerId === answerId ? u : a)); },
       error: (e) => console.error(e)
     });
   }
 
   dislikeAnswer(answerId: number): void {
-    this.answerService.dislikeAnswer(answerId).subscribe({
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    ///TODO: Uncomment this line after login implementation
+    // change ion_pop to this.currentUsername
+    this.answerService.dislikeAnswer(answerId, "ion_pop").subscribe({
       next: (u) => { this.answers.update(list => list.map(a => a.answerId === answerId ? u : a)); },
       error: (e) => console.error(e)
     });

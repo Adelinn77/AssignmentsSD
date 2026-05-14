@@ -11,16 +11,17 @@ export class AnswerService {
   private apiUrl = `${environment.apiUrl}/answers`;
   private http = inject(HttpClient);
 
-  getAnswersByQuestionId(questionId: number): Observable<Answer[]> {
-    return this.http.get<Answer[]>(`${this.apiUrl}/question/${questionId}`);
+  getAnswersByQuestionId(questionId: number, viewer?: string): Observable<Answer[]> {
+    const url = viewer ? `${this.apiUrl}/question/${questionId}?viewer=${encodeURIComponent(viewer)}` : `${this.apiUrl}/question/${questionId}`;
+    return this.http.get<Answer[]>(url);
   }
 
-  likeAnswer(id: number): Observable<Answer> {
-    return this.http.put<Answer>(`${this.apiUrl}/${id}/like`, {});
+  likeAnswer(id: number, username: string): Observable<Answer> {
+    return this.http.put<Answer>(`${this.apiUrl}/${id}/like?username=${encodeURIComponent(username)}`, {});
   }
 
-  dislikeAnswer(id: number): Observable<Answer> {
-    return this.http.put<Answer>(`${this.apiUrl}/${id}/dislike`, {});
+  dislikeAnswer(id: number, username: string): Observable<Answer> {
+    return this.http.put<Answer>(`${this.apiUrl}/${id}/dislike?username=${encodeURIComponent(username)}`, {});
   }
 
   createAnswer(answer: Partial<Answer>): Observable<Answer> {

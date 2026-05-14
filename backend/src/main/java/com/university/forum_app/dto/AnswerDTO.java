@@ -21,5 +21,6 @@ public class AnswerDTO {
     private int likes;
     private int dislikes;
     private LocalDateTime dateTime;
+    private String currentUserVote;
     private List<String> imageUrls;
 }

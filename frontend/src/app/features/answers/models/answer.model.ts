@@ -8,4 +8,5 @@ export interface Answer {
   dislikes: number;
   dateTime: string;
   imageUrls: string[];
+  currentUserVote?: string;
 }
