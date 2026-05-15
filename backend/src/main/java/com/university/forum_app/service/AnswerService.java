@@ -55,6 +55,7 @@ public class AnswerService {
                 .text(answer.getText())
                 .likes(answer.getLikes())
                 .dislikes(answer.getDislikes())
+                .accepted(answer.isAccepted())
                 .dateTime(answer.getDate())
                 .imageUrls(answer.getImages() != null
                         ? answer.getImages().stream().map(AnswerImage::getImageUrl).toList()
@@ -254,6 +255,37 @@ public class AnswerService {
         answer.setLikes((int) answerVoteRepository.countByAnswerAndIsLike(answer, true));
         answer.setDislikes((int) answerVoteRepository.countByAnswerAndIsLike(answer, false));
         answerRepo.save(answer);
+        return mapEntityToDTO(answer, username);
+    }
+
+    @Transactional
+    public AnswerDTO acceptAnswer(Long id, String username) {
+        Answer answer = answerRepo.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("No answer exists with id: '" + id + "'."));
+
+        Question question = answer.getQuestion();
+        if (question == null) {
+            throw new IllegalArgumentException("Answer is not associated with any question.");
+        }
+
+        if (question.getAuthor() == null || !question.getAuthor().getUsername().equals(username)) {
+            throw new IllegalArgumentException("Only the author of the question can accept an answer.");
+        }
+
+        List<Answer> questionAnswers = answerRepo.findByQuestionId(question.getId());
+        for (Answer a : questionAnswers) {
+            if (a.isAccepted()) {
+                a.setAccepted(false);
+                answerRepo.save(a);
+            }
+        }
+
+        answer.setAccepted(true);
+        answerRepo.save(answer);
+
+        question.setStatus(Status.RESOLVED);
+        questionRepository.save(question);
+
         return mapEntityToDTO(answer, username);
     }
 

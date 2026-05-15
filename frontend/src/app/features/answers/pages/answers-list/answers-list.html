@@ -172,7 +172,7 @@
       <!-- Normal view for this answer -->
       <ng-template #viewAnswer>
         <div class="answer-card">
-          <div class="answer-header">
+          <div class="answer-header" [ngStyle]="{'background-color': answer.accepted ? '#f0fff0' : 'transparent', 'padding': answer.accepted ? '10px' : '0', 'border-radius': '8px'}">
             <div class="answer-author-section">
               <div class="answer-avatar">{{ answer.authorName.charAt(0).toUpperCase() || '?' }}</div>
               <div class="answer-author-info">
@@ -180,7 +180,12 @@
                 <span class="answer-date">{{ answer.dateTime | date:'dd MMM yyyy, HH:mm' }}</span>
               </div>
             </div>
-            <span class="answer-number">#{{ i + 1 }}</span>
+            <div style="display: flex; align-items: center; gap: 15px;">
+              <span *ngIf="answer.accepted" class="accepted-badge" style="color: #28a745; font-weight: bold; background: #e6ffe6; padding: 4px 10px; border-radius: 20px; border: 1px solid #28a745;">
+                ✅ Accepted
+              </span>
+              <span class="answer-number">#{{ i + 1 }}</span>
+            </div>
           </div>
 
           <div class="answer-body">
@@ -212,6 +217,14 @@
                     [style.borderColor]="answer.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'"
                     style="padding: 6px 10px; border-radius: 6px; cursor: pointer;">
               <span class="vote-icon" style="font-size: 18px;">👎</span>
+            </button>
+            
+            <button *ngIf="isQuestionAuthor() && !answer.accepted" 
+                    (click)="acceptAnswer(answer)" 
+                    style="margin-left: auto; background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.2s;"
+                    onmouseover="this.style.backgroundColor='#218838'"
+                    onmouseout="this.style.backgroundColor='#28a745'">
+              Accept Answer
             </button>
           </div>
 
