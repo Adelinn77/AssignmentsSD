@@ -144,10 +144,10 @@ export class QuestionList implements OnInit {
   }
 
   isAuthor(question: Question): boolean {
-    return this.currentUsername !== null && this.currentUsername === question.authorName;
+    // TODO: Implement author check after login implementation
+    // return this.currentUsername !== null && this.currentUsername === question.authorName;
 
-    // Dacă vrei temporar să apară edit/delete pentru toate întrebările, folosește:
-    // return true;
+    return true;
   }
 
   startEdit(question: Question): void {
@@ -207,11 +207,13 @@ export class QuestionList implements OnInit {
   }
 
   likeQuestion(question: Question): void {
-    if (!this.currentUsername) {
-      alert('You must be logged in to vote.');
-      return;
-    }
-    this.questionService.likeQuestion(question.questionId, this.currentUsername).subscribe({
+    ///TODO: Uncomment this after login implementation
+    // if (!this.currentUsername) {
+    //   alert('You must be logged in to vote.');
+    //   return;
+    // }
+    //TODO: Change ion_pop with this.username
+    this.questionService.likeQuestion(question.questionId, "ion_pop").subscribe({
       next: (updatedQuestion) => {
         this.questions.update(list => list.map(q => q.questionId === updatedQuestion.questionId ? updatedQuestion : q));
       },
@@ -220,11 +222,14 @@ export class QuestionList implements OnInit {
   }
 
   dislikeQuestion(question: Question): void {
-    if (!this.currentUsername) {
-      alert('You must be logged in to vote.');
-      return;
-    }
-    this.questionService.dislikeQuestion(question.questionId, this.currentUsername).subscribe({
+    ///TODO: Uncomment this after login implementation
+
+    // if (!this.currentUsername) {
+    //   alert('You must be logged in to vote.');
+    //   return;
+    // }
+    //TODO: Change ion_pop with this.username
+    this.questionService.dislikeQuestion(question.questionId, "ion_pop").subscribe({
       next: (updatedQuestion) => {
         this.questions.update(list => list.map(q => q.questionId === updatedQuestion.questionId ? updatedQuestion : q));
       },

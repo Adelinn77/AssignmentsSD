@@ -107,15 +107,20 @@ export class AnswersList implements OnInit {
   likeQuestion(): void {
     const q = this.question();
     if (!q) return;
-    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    this.questionService.likeQuestion(q.questionId, this.currentUsername).subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
+    ///TODO: Uncomment this line after login implementation
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    // change ion_pop to this.currentUsername
+    this.questionService.likeQuestion(q.questionId, "ion_pop").subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
   }
 
   dislikeQuestion(): void {
     const q = this.question();
     if (!q) return;
-    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    this.questionService.dislikeQuestion(q.questionId, this.currentUsername).subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
+
+    ///TODO: Uncomment this line after login implementation
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    // change ion_pop to this.currentUsername
+    this.questionService.dislikeQuestion(q.questionId, "ion_pop").subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
   }
 
   isAnswerAuthor(answer: Answer): boolean {
@@ -170,16 +175,20 @@ export class AnswersList implements OnInit {
   }
 
   likeAnswer(answerId: number): void {
-    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    this.answerService.likeAnswer(answerId, this.currentUsername).subscribe({
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    ///TODO: Uncomment this line after login implementation
+    // change ion_pop to this.currentUsername
+    this.answerService.likeAnswer(answerId, "ion_pop").subscribe({
       next: (u) => { this.answers.update(list => list.map(a => a.answerId === answerId ? u : a)); },
       error: (e) => console.error(e)
     });
   }
 
   dislikeAnswer(answerId: number): void {
-    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    this.answerService.dislikeAnswer(answerId, this.currentUsername).subscribe({
+    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    ///TODO: Uncomment this line after login implementation
+    // change ion_pop to this.currentUsername
+    this.answerService.dislikeAnswer(answerId, "ion_pop").subscribe({
       next: (u) => { this.answers.update(list => list.map(a => a.answerId === answerId ? u : a)); },
       error: (e) => console.error(e)
     });
