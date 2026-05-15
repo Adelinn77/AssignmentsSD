@@ -22,5 +22,6 @@ public class AnswerDTO {
     private int dislikes;
     private LocalDateTime dateTime;
     private String currentUserVote;
+    private boolean accepted;
     private List<String> imageUrls;
 }

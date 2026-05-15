@@ -9,4 +9,5 @@ export interface Answer {
   dateTime: string;
   imageUrls: string[];
   currentUserVote?: string;
+  accepted?: boolean;
 }

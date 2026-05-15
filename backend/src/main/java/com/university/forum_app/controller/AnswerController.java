@@ -109,4 +109,14 @@ public class AnswerController {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
+
+    @PutMapping("/{id}/accept")
+    public ResponseEntity<Object> acceptAnswer(@PathVariable Long id, @RequestParam String username) {
+        try {
+            AnswerDTO answer = answerService.acceptAnswer(id, username);
+            return new ResponseEntity<>(answer, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+    }
 }

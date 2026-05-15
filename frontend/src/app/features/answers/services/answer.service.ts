@@ -24,6 +24,10 @@ export class AnswerService {
     return this.http.put<Answer>(`${this.apiUrl}/${id}/dislike?username=${encodeURIComponent(username)}`, {});
   }
 
+  acceptAnswer(id: number, username: string): Observable<Answer> {
+    return this.http.put<Answer>(`${this.apiUrl}/${id}/accept?username=${encodeURIComponent(username)}`, {});
+  }
+
   createAnswer(answer: Partial<Answer>): Observable<Answer> {
     return this.http.post<Answer>(this.apiUrl, answer);
   }

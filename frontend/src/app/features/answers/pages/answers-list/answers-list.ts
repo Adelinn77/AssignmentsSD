@@ -185,6 +185,26 @@ export class AnswersList implements OnInit {
     });
   }
 
+  acceptAnswer(answer: Answer): void {
+    if (!this.currentUsername) { alert('You must be logged in.'); return; }
+    this.answerService.acceptAnswer(answer.answerId, this.currentUsername).subscribe({
+      next: (updatedAnswer) => {
+        this.answers.update(list => list.map(a => {
+          if (a.answerId === updatedAnswer.answerId) return updatedAnswer;
+          return { ...a, accepted: false };
+        }));
+        const q = this.question();
+        if (q) {
+          this.question.set({ ...q, status: 'RESOLVED' });
+        }
+      },
+      error: (e) => {
+        console.error('Error accepting answer:', e);
+        alert('Could not accept answer: ' + (e.error || e.message));
+      }
+    });
+  }
+
   getStatusClass(status: string | undefined): string {
     if (!status) return '';
     switch (status) {

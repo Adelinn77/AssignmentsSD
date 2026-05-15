@@ -37,6 +37,9 @@ public class Answer {
     @Column(nullable = false, columnDefinition = "int default 0")
     private int dislikes = 0;
 
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean accepted = false;
+
     @CreationTimestamp
     @Column(name = "date_and_time",updatable = false)
     private LocalDateTime date;
