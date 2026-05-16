@@ -1,11 +1,14 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 const CURRENT_USER_KEY = 'currentUsername';
+const AUTH_TOKEN_KEY = 'userToken';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
+  private router = inject(Router);
 
   getCurrentUsername(): string | null {
     return localStorage.getItem(CURRENT_USER_KEY);
@@ -15,11 +18,21 @@ export class AuthService {
     localStorage.setItem(CURRENT_USER_KEY, username);
   }
 
-  clearCurrentUsername(): void {
+  setAuthToken(token: string): void {
+    localStorage.setItem(AUTH_TOKEN_KEY, token);
+  }
+
+  getAuthToken(): string | null {
+    return localStorage.getItem(AUTH_TOKEN_KEY);
+  }
+
+  logout(): void {
     localStorage.removeItem(CURRENT_USER_KEY);
+    localStorage.removeItem(AUTH_TOKEN_KEY);
+    this.router.navigate(['/login']);
   }
 
   isLoggedIn(): boolean {
-    return this.getCurrentUsername() !== null;
+    return localStorage.getItem(CURRENT_USER_KEY) !== null && localStorage.getItem(AUTH_TOKEN_KEY) !== null;
   }
 }
