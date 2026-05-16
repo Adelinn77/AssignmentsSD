@@ -49,11 +49,11 @@
                 style="padding: 8px 12px; border-radius: 6px; cursor: pointer;">
           <span class="vote-icon" style="font-size: 20px;">👍</span>
         </button>
-        
+
         <div class="score" style="font-weight: bold; font-size: 20px; text-align: center; min-width: 30px;">
           {{ question()!.likes - question()!.dislikes }}
         </div>
-        
+
         <button class="vote-btn dislike-btn" (click)="dislikeQuestion()" id="btn-dislike-question"
                 [style.backgroundColor]="question()!.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'"
                 [style.borderColor]="question()!.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'"
@@ -218,9 +218,11 @@
                     style="padding: 6px 10px; border-radius: 6px; cursor: pointer;">
               <span class="vote-icon" style="font-size: 18px;">👎</span>
             </button>
-            
-            <button *ngIf="isQuestionAuthor() && !answer.accepted" 
-                    (click)="acceptAnswer(answer)" 
+
+<!--            TODO: Add this: isQuestionAuthor() && to the button display condition-->
+<!--            isQuestionAuthor() && -->
+            <button *ngIf="!answer.accepted"
+                    (click)="acceptAnswer(answer)"
                     style="margin-left: auto; background-color: #28a745; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; transition: background-color 0.2s;"
                     onmouseover="this.style.backgroundColor='#218838'"
                     onmouseout="this.style.backgroundColor='#28a745'">

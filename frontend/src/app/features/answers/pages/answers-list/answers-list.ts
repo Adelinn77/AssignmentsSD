@@ -195,8 +195,10 @@ export class AnswersList implements OnInit {
   }
 
   acceptAnswer(answer: Answer): void {
-    if (!this.currentUsername) { alert('You must be logged in.'); return; }
-    this.answerService.acceptAnswer(answer.answerId, this.currentUsername).subscribe({
+    // if (!this.currentUsername) { alert('You must be logged in.'); return; }
+    ///TODO: Uncomment this line after login implementation
+    ///TODO: change ion_pop to this.currentUsername
+    this.answerService.acceptAnswer(answer.answerId, "ion_pop").subscribe({
       next: (updatedAnswer) => {
         this.answers.update(list => list.map(a => {
           if (a.answerId === updatedAnswer.answerId) return updatedAnswer;
