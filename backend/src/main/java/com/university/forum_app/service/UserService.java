@@ -1,9 +1,11 @@
 package com.university.forum_app.service;
 
 import com.university.forum_app.dto.UserDTO;
+import com.university.forum_app.entity.Role;
 import com.university.forum_app.entity.User;
 import com.university.forum_app.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -16,6 +18,9 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     private UserDTO mapEntityToDTO(User user) {
         return UserDTO.builder()
@@ -39,20 +44,31 @@ public class UserService {
 
     @Transactional
     public UserDTO saveUser(UserDTO userDTO) {
-        if(userRepository.existsByUsername(userDTO.getUsername())) {
-            throw new IllegalArgumentException("User with username " + userDTO.getUsername() + " already exists");
+        if (userRepository.existsByUsername(userDTO.getUsername())) {
+            throw new IllegalArgumentException("This username is already taken!");
         }
-        if(userRepository.existsByEmail(userDTO.getEmail())) {
-            throw new IllegalArgumentException("User with email " + userDTO.getEmail() + " already exists");
+        if (userRepository.existsByEmail(userDTO.getEmail())) {
+            throw new IllegalArgumentException("This email is already registered!");
         }
-        User newUser = mapDTOToEntity(userDTO);
-        userRepository.save(newUser);
-        return mapEntityToDTO(newUser);
+        if (userDTO.getPhone() != null && !userDTO.getPhone().trim().isEmpty()) {
+            if (userRepository.existsByPhone(userDTO.getPhone())) {
+                throw new IllegalArgumentException("This phone number is already associated with an account!");
+            }
+        }
+
+        User user = mapDTOToEntity(userDTO);
+
+        user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
+
+        user.setRole(Role.USER);
+
+        userRepository.save(user);
+
+        return mapEntityToDTO(user);
     }
 
     @Transactional(readOnly = true)
     public UserDTO findUserByUsername(String username) {
-        // FIX: Verificare corectă cu null
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("User with username '" + username + "' does not exist");
@@ -62,14 +78,11 @@ public class UserService {
 
     @Transactional
     public UserDTO updateUser(UserDTO updatedUser) {
-        // FIX: Verificare corectă cu null
-        User user = userRepository.findByUsername(updatedUser.getUsername());
+       User user = userRepository.findByUsername(updatedUser.getUsername());
         if (user == null) {
             throw new IllegalArgumentException("User with username '" + updatedUser.getUsername() + "' does not exist.");
         }
 
-        // Am scos verificarea redundantă a username-ului.
-        // Actualizăm restul datelor:
         user.setEmail(updatedUser.getEmail());
         user.setPhone(updatedUser.getPhone());
         user.setFirstName(updatedUser.getFirstName());

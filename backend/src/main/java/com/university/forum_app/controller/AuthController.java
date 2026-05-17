@@ -1,8 +1,10 @@
 package com.university.forum_app.controller;
 
+import com.university.forum_app.dto.UserDTO;
 import com.university.forum_app.entity.User;
 import com.university.forum_app.entity.Role;
 import com.university.forum_app.repository.UserRepository;
+import com.university.forum_app.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -11,27 +13,19 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+    public AuthController(UserService userService) {
+        this.userService = userService;
     }
 
     @PostMapping("/register")
-    public ResponseEntity<String> registerUser(@RequestBody User user) {
-        if (userRepository.findByUsername(user.getUsername()) != null) {
-            return ResponseEntity.badRequest().body("Username already taken!");
+    public ResponseEntity<String> registerUser(@RequestBody UserDTO userDTO) {
+        try {
+            userService.saveUser(userDTO);
+            return ResponseEntity.ok("User registered successfully!");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
-
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-
-        if (user.getRole() == null) {
-            user.setRole(Role.USER);
-        }
-
-        userRepository.save(user);
-        return ResponseEntity.ok("User registered successfully!");
     }
 }

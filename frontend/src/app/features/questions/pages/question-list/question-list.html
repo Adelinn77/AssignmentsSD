@@ -295,20 +295,22 @@
 
           <td class="text-center">
             <div class="vote-section" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-              <button 
-                (click)="likeQuestion(question)" 
+              <button
+                *ngIf="!isAuthor(question)"
+                (click)="likeQuestion(question)"
                 style="background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-size: 16px;"
                 [style.backgroundColor]="question.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'"
                 [style.borderColor]="question.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
               >
                 👍
               </button>
-              
+
               <div class="score" style="font-weight: bold; font-size: 16px; min-width: 24px; text-align: center;">
                 {{ question.likes - question.dislikes }}
               </div>
-              
-              <button 
+
+              <button
+                *ngIf="!isAuthor(question)"
                 (click)="dislikeQuestion(question)"
                 style="background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-size: 16px;"
                 [style.backgroundColor]="question.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'"

@@ -11,4 +11,6 @@ public interface AnswerVoteRepository extends CrudRepository<AnswerVote, Long> {
     
     @Query("SELECT COUNT(v) FROM AnswerVote v WHERE v.answer = :answer AND v.isLike = :isLike")
     long countByAnswerAndIsLike(Answer answer, boolean isLike);
+
+    void deleteByAnswer(Answer answer);
 }

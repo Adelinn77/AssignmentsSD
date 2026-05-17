@@ -15,4 +15,6 @@ public interface AnswerRepository extends CrudRepository<Answer, Long> {
     List<Answer> findByAuthorId(Long userId);
 
     Answer findAnswerById(Long answerId);
+
+    void deleteAnswerById(Long answerId);
 }
