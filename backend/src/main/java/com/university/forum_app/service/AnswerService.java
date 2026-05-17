@@ -168,10 +168,26 @@ public class AnswerService {
 
     @Transactional
     public void deleteAnswerById(Long id) {
-        if (answerRepo.existsById(id)) {
-            answerRepo.deleteById(id);
-        } else {
+        Answer answer = answerRepo.findAnswerById(id);
+        if(answer == null) {
             throw new IllegalArgumentException("No answer exists with id: '" + id + "'.");
+        }
+
+        Question question = answer.getQuestion();
+        boolean wasAccepted = answer.isAccepted();
+
+        answerVoteRepository.deleteByAnswer(answer);
+
+        if (question.getAnswers() != null) {
+            question.getAnswers().remove(answer);
+        }
+
+        answerRepo.delete(answer);
+
+        if (question.getAnswers() == null || question.getAnswers().isEmpty()) {
+            question.setStatus(Status.RECEIVED);
+        } else if (wasAccepted) {
+            question.setStatus(Status.IN_PROGRESS);
         }
     }
 
@@ -211,6 +227,10 @@ public class AnswerService {
             throw new IllegalArgumentException("User not found.");
         }
 
+        if (answer.getAuthor().getUsername().equals(user.getUsername())) {
+            throw new IllegalArgumentException("Can't like your own answer!");
+        }
+
         AnswerVote existingVote = answerVoteRepository.findByAnswerAndUser(answer, user);
         if (existingVote != null) {
             if (existingVote.isLike()) {
@@ -237,6 +257,10 @@ public class AnswerService {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("User not found.");
+        }
+
+        if (answer.getAuthor().getUsername().equals(user.getUsername())) {
+            throw new IllegalArgumentException("Can't dislike your own answer!");
         }
 
         AnswerVote existingVote = answerVoteRepository.findByAnswerAndUser(answer, user);
@@ -272,6 +296,10 @@ public class AnswerService {
             throw new IllegalArgumentException("Only the author of the question can accept an answer.");
         }
 
+        if (question.getStatus() == Status.RESOLVED) {
+            throw new IllegalArgumentException("This question already has an accepted answer.");
+        }
+
         List<Answer> questionAnswers = answerRepo.findByQuestionId(question.getId());
         for (Answer a : questionAnswers) {
             if (a.isAccepted()) {
@@ -281,6 +309,7 @@ public class AnswerService {
         }
 
         answer.setAccepted(true);
+        answerRepo.save(answer);
         answerRepo.save(answer);
 
         question.setStatus(Status.RESOLVED);

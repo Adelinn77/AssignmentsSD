@@ -30,7 +30,7 @@ export class UserList implements OnInit {
         this.isLoading.set(false);
       },
       error: (err) => {
-        this.errorMessage.set('Nu s-au putut incarca utilizatorii.');
+        this.errorMessage.set('Could not load users. Please try again later.');
         this.isLoading.set(false);
         console.error('API Error:', err);
       }

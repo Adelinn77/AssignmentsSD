@@ -1,11 +1,16 @@
-import { Component } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router'; //changes the page in the background, it doesn t reload the page
+import {Component, inject} from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import {AuthService} from '../../../features/auth/services/auth.service';
+
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.html',
   styleUrls: ['./navbar.scss']
 })
-export class Navbar {}
+export class Navbar {
+  public authService = inject(AuthService);
+}

@@ -198,6 +198,10 @@ public class QuestionService {
             throw new IllegalArgumentException("User not found.");
         }
 
+        if (question.getAuthor().getUsername().equals(user.getUsername())) {
+            throw new IllegalArgumentException("Can't like your own question!");
+        }
+
         QuestionVote existingVote = questionVoteRepository.findByQuestionAndUser(question, user);
         if (existingVote != null) {
             if (existingVote.isLike()) {
@@ -224,6 +228,10 @@ public class QuestionService {
         User user = userRepository.findByUsername(username);
         if (user == null) {
             throw new IllegalArgumentException("User not found.");
+        }
+
+        if (question.getAuthor().getUsername().equals(user.getUsername())) {
+            throw new IllegalArgumentException("Can't dislike your own question!");
         }
 
         QuestionVote existingVote = questionVoteRepository.findByQuestionAndUser(question, user);

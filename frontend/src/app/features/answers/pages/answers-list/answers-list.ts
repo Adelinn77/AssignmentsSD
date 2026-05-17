@@ -107,25 +107,20 @@ export class AnswersList implements OnInit {
   likeQuestion(): void {
     const q = this.question();
     if (!q) return;
-    ///TODO: Uncomment this line after login implementation
-    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    // change ion_pop to this.currentUsername
-    this.questionService.likeQuestion(q.questionId, "ion_pop").subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
+    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    this.questionService.likeQuestion(q.questionId, this.currentUsername).subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
   }
 
   dislikeQuestion(): void {
     const q = this.question();
     if (!q) return;
 
-    ///TODO: Uncomment this line after login implementation
-    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    // change ion_pop to this.currentUsername
-    this.questionService.dislikeQuestion(q.questionId, "ion_pop").subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
+    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    this.questionService.dislikeQuestion(q.questionId, this.currentUsername).subscribe({ next: (u) => this.question.set(u), error: (e) => console.error(e) });
   }
 
   isAnswerAuthor(answer: Answer): boolean {
-    // return this.currentUsername !== null && this.currentUsername === answer.authorName;
-    return true;
+    return this.currentUsername !== null && this.currentUsername === answer.authorName;
   }
 
   startEditAnswer(answer: Answer): void {
@@ -165,7 +160,12 @@ export class AnswersList implements OnInit {
 
     this.answerService.deleteAnswer(answer.answerId).subscribe({
       next: () => {
-        this.answers.update(list => list.filter(a => a.answerId !== answer.answerId));
+        const q = this.question();
+        if (q) {
+          this.loadQuestion(q.questionId);
+
+          this.loadAnswers(q.questionId);
+        }
       },
       error: (err) => {
         console.error('Error deleting answer:', err);
@@ -175,30 +175,24 @@ export class AnswersList implements OnInit {
   }
 
   likeAnswer(answerId: number): void {
-    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    ///TODO: Uncomment this line after login implementation
-    // change ion_pop to this.currentUsername
-    this.answerService.likeAnswer(answerId, "ion_pop").subscribe({
+    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    this.answerService.likeAnswer(answerId, this.currentUsername).subscribe({
       next: (u) => { this.answers.update(list => list.map(a => a.answerId === answerId ? u : a)); },
       error: (e) => console.error(e)
     });
   }
 
   dislikeAnswer(answerId: number): void {
-    // if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
-    ///TODO: Uncomment this line after login implementation
-    // change ion_pop to this.currentUsername
-    this.answerService.dislikeAnswer(answerId, "ion_pop").subscribe({
+    if (!this.currentUsername) { alert('You must be logged in to vote.'); return; }
+    this.answerService.dislikeAnswer(answerId, this.currentUsername).subscribe({
       next: (u) => { this.answers.update(list => list.map(a => a.answerId === answerId ? u : a)); },
       error: (e) => console.error(e)
     });
   }
 
   acceptAnswer(answer: Answer): void {
-    // if (!this.currentUsername) { alert('You must be logged in.'); return; }
-    ///TODO: Uncomment this line after login implementation
-    ///TODO: change ion_pop to this.currentUsername
-    this.answerService.acceptAnswer(answer.answerId, "ion_pop").subscribe({
+    if (!this.currentUsername) { alert('You can t accept an answer if you are not the author of the question.'); return; }
+    this.answerService.acceptAnswer(answer.answerId, this.currentUsername).subscribe({
       next: (updatedAnswer) => {
         this.answers.update(list => list.map(a => {
           if (a.answerId === updatedAnswer.answerId) return updatedAnswer;
@@ -269,7 +263,7 @@ export class AnswersList implements OnInit {
     const newAnswer: Partial<Answer> = {
       questionId: q.questionId,
       text,
-      authorName: 'ion_pop'
+      authorName: this.currentUsername ?? undefined
     };
 
     this.isLoading.set(true);

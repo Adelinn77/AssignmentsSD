@@ -45,6 +45,7 @@ public class Question {
     @Column(name = "date_and_time",updatable = false)
     private LocalDateTime date;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status")
     private Status status;
 
