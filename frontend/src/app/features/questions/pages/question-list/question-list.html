@@ -290,7 +290,13 @@
           </td>
 
           <td class="text-center">
-            -
+            <span
+              [style.color]="(question.authorScore ?? 0) > 0 ? '#28a745' : (question.authorScore ?? 0) < 0 ? '#dc3545' : '#6c757d'"
+              style="font-weight: bold; font-size: 14px;"
+              title="Author reputation score"
+            >
+              {{ (question.authorScore ?? 0) % 1 === 0 ? (question.authorScore ?? 0) : (question.authorScore ?? 0 | number:'1.1-1') }}
+            </span>
           </td>
 
           <td class="text-center">

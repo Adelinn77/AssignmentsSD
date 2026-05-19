@@ -19,6 +19,7 @@
           <th>Last Name</th>
           <th>Email</th>
           <th>Phone</th>
+          <th>Score</th>
         </tr>
       </thead>
       <tbody>
@@ -30,6 +31,7 @@
             <td>{{ user.lastName }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.phone }}</td>
+            <td [style.color]="(user.score ?? 0) > 0 ? '#28a745' : (user.score ?? 0) < 0 ? '#dc3545' : '#6c757d'" style="font-weight: bold;">{{ user.score ?? 0 }}</td>
           </tr>
         }
       </tbody>

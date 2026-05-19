@@ -13,6 +13,7 @@ export interface Question {
   date: string;
   status: Status | string;
   authorName: string;
+  authorScore?: number;
   tags: string[];
   imageUrls: string[];
   currentUserVote?: string;

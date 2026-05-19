@@ -9,6 +9,14 @@
         <div class="author-section">
           <div class="author-info">
             <span class="author-name">{{ question()!.authorName }}</span>
+            <span
+              class="author-score"
+              [style.color]="(question()!.authorScore ?? 0) > 0 ? '#28a745' : (question()!.authorScore ?? 0) < 0 ? '#dc3545' : '#6c757d'"
+              style="font-weight: bold; font-size: 13px; margin-left: 8px;"
+              title="Author reputation score"
+            >
+              ({{ question()!.authorScore ?? 0 }} pts)
+            </span>
             <span class="question-date">{{ question()!.date | date:'dd MMM yyyy, HH:mm' }}</span>
           </div>
         </div>
@@ -174,7 +182,17 @@
             <div class="answer-author-section">
               <div class="answer-avatar">{{ answer.authorName.charAt(0).toUpperCase() || '?' }}</div>
               <div class="answer-author-info">
-                <span class="answer-author-name">{{ answer.authorName || 'Anonymous' }}</span>
+                <span class="answer-author-name">
+                  {{ answer.authorName || 'Anonymous' }}
+                  <span
+                    class="author-score"
+                    [style.color]="(answer.authorScore ?? 0) > 0 ? '#28a745' : (answer.authorScore ?? 0) < 0 ? '#dc3545' : '#6c757d'"
+                    style="font-weight: bold; font-size: 12px; margin-left: 6px;"
+                    title="Author reputation score"
+                  >
+                    ({{ answer.authorScore ?? 0 }} pts)
+                  </span>
+                </span>
                 <span class="answer-date">{{ answer.dateTime | date:'dd MMM yyyy, HH:mm' }}</span>
               </div>
             </div>
