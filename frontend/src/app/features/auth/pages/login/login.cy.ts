@@ -11,7 +11,7 @@ describe('Login Component', () => {
 
   beforeEach(() => {
 
-    // @ts-ignore
+    // @ts-expect-error: Bypassing error for testing purposes
     cy.mount(Login, {
       providers: [
         provideHttpClient(),
