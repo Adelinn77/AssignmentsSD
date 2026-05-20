@@ -1,1 +1,10 @@
 frontend/node_modules/
+
+# Cypress artifacts
+frontend/cypress/screenshots/
+frontend/cypress/reports/
+frontend/cypress/videos/
+
+cypress/cypress/screenshots/
+cypress/cypress/reports/
+cypress/cypress/videos/
