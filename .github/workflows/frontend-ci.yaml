@@ -19,16 +19,20 @@ jobs:
           cache: npm
 
       - name: Install dependencies
+        working-directory: ./frontend
         run: npm ci
 
       - name: Run Angular lint
+        working-directory: ./frontend
         continue-on-error: true
         run: npm run lint
 
       - name: Build Angular app
+        working-directory: ./frontend
         continue-on-error: true
         run: npm run build
 
       - name: Run Cypress tests
+        working-directory: ./frontend
         continue-on-error: true
         run: npx cypress run
