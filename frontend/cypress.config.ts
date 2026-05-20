@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   allowCypressEnv: false,
 
   component: {
@@ -7,11 +7,5 @@ module.exports = {
       bundler: "webpack",
     },
     specPattern: "**/*.cy.ts",
-  },
-
-  e2e: {
-    setupNodeEvents(on, config) {
-      // implement node event listeners here
-    },
   },
 };

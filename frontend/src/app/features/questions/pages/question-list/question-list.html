@@ -1,124 +1,157 @@
 <div class="questions-container">
   <div class="header-section">
     <h2>Questions List</h2>
-    <button
-      *ngIf="!showAddQuestionPanel()"
-      (click)="openAddQuestionPanel()"
-      class="add-question-btn"
-    >
-      Add New Question
-    </button>
+    @if (!showAddQuestionPanel()) {
+      <button (click)="openAddQuestionPanel()" class="add-question-btn">Add New Question</button>
+    }
   </div>
 
-  <div
-    class="add-question-panel"
-    *ngIf="showAddQuestionPanel()"
-    style="margin-bottom: 30px; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);"
-  >
-    <div class="panel-content">
-      <h3 style="margin-top: 0;">Add New Question</h3>
-
-      <div class="error-message" *ngIf="errorMessage()">
-        {{ errorMessage() }}
-      </div>
-
-      <div class="form-group">
-        <label for="questionTitle">Title</label>
-        <input
-          id="questionTitle"
-          type="text"
-          [value]="newQuestionTitle()"
-          (input)="newQuestionTitle.set($any($event.target).value)"
-          placeholder="Enter question title"
-        />
-      </div>
-
-      <div class="form-group">
-        <label for="questionText">Question Text</label>
-        <textarea
-          id="questionText"
-          [value]="newQuestionText()"
-          (input)="newQuestionText.set($any($event.target).value)"
-          placeholder="Enter your question"
-          rows="6"
-        ></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="questionTags">Tags (comma separated)</label>
-        <input
-          id="questionTags"
-          type="text"
-          [value]="newQuestionTags()"
-          (input)="newQuestionTags.set($any($event.target).value)"
-          placeholder="e.g., javascript, angular, typescript"
-        />
-      </div>
-
-      <div class="form-group">
-        <label>Attachments</label>
-
-        <div
-          class="image-previews-container"
-          *ngIf="selectedImages().length > 0"
-          style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;"
-        >
-          <div
-            *ngFor="let img of selectedImages(); let i = index"
-            style="position: relative; display: inline-block;"
-          >
-            <img
-              [src]="img.url"
-              alt="Preview"
-              style="max-height: 200px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;"
+  @if (showAddQuestionPanel()) {
+    <div
+      class="add-question-panel"
+      style="
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      "
+    >
+      <div class="panel-content">
+        <h3 style="margin-top: 0">Add New Question</h3>
+        @if (errorMessage()) {
+          <div class="error-message">
+            {{ errorMessage() }}
+          </div>
+        }
+        <div class="form-group">
+          <label for="questionTitle">Title</label>
+          <input
+            id="questionTitle"
+            type="text"
+            [value]="newQuestionTitle()"
+            (input)="newQuestionTitle.set($any($event.target).value)"
+            placeholder="Enter question title"
+          />
+        </div>
+        <div class="form-group">
+          <label for="questionText">Question Text</label>
+          <textarea
+            id="questionText"
+            [value]="newQuestionText()"
+            (input)="newQuestionText.set($any($event.target).value)"
+            placeholder="Enter your question"
+            rows="6"
+          ></textarea>
+        </div>
+        <div class="form-group">
+          <label for="questionTags">Tags (comma separated)</label>
+          <input
+            id="questionTags"
+            type="text"
+            [value]="newQuestionTags()"
+            (input)="newQuestionTags.set($any($event.target).value)"
+            placeholder="e.g., javascript, angular, typescript"
+          />
+        </div>
+        <div class="form-group">
+          <strong>Attachments</strong>
+          @if (selectedImages().length > 0) {
+            <div
+              class="image-previews-container"
+              style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px"
+            >
+              @for (img of selectedImages(); track img; let i = $index) {
+                <div style="position: relative; display: inline-block">
+                  <img
+                    [src]="img.url"
+                    alt="Preview"
+                    style="
+                      max-height: 200px;
+                      border-radius: 8px;
+                      border: 1px solid #ddd;
+                      object-fit: cover;
+                    "
+                  />
+                  <button
+                    type="button"
+                    (click)="removeImage(i)"
+                    title="Remove image"
+                    style="
+                      position: absolute;
+                      top: -10px;
+                      right: -10px;
+                      background: #ff4444;
+                      color: white;
+                      border: none;
+                      border-radius: 50%;
+                      width: 28px;
+                      height: 28px;
+                      cursor: pointer;
+                      font-weight: bold;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+                    "
+                  >
+                    ✕
+                  </button>
+                </div>
+              }
+            </div>
+          }
+          <div class="file-upload-actions" style="margin-bottom: 10px">
+            <input
+              type="file"
+              multiple
+              accept="image/*"
+              (change)="onImagesSelected($event)"
+              #fileInput
+              style="display: none"
             />
-
             <button
               type="button"
-              (click)="removeImage(i)"
-              title="Remove image"
-              style="position: absolute; top: -10px; right: -10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"
+              class="btn-add-image"
+              (click)="fileInput.click()"
+              style="
+                padding: 8px 15px;
+                cursor: pointer;
+                background: #f0f2f5;
+                border: 1px solid #ccc;
+                border-radius: 6px;
+              "
             >
-              ✕
+              📷 Add Images
             </button>
           </div>
         </div>
-
-        <div class="file-upload-actions" style="margin-bottom: 10px;">
-          <input
-            type="file"
-            multiple
-            accept="image/*"
-            (change)="onImagesSelected($event)"
-            #fileInput
-            style="display: none;"
-          />
-
-          <button
-            type="button"
-            class="btn-add-image"
-            (click)="fileInput.click()"
-            style="padding: 8px 15px; cursor: pointer; background: #f0f2f5; border: 1px solid #ccc; border-radius: 6px;"
-          >
-            📷 Add Images
-          </button>
+        <div class="panel-actions">
+          <button (click)="postQuestion()" class="post-btn">Post Question</button>
+          <button (click)="closeAddQuestionPanel()" class="cancel-btn">Cancel</button>
         </div>
       </div>
-
-      <div class="panel-actions">
-        <button (click)="postQuestion()" class="post-btn">Post Question</button>
-        <button (click)="closeAddQuestionPanel()" class="cancel-btn">Cancel</button>
-      </div>
     </div>
-  </div>
+  }
 
   <div
     class="filters-panel"
-    style="margin-bottom: 20px; padding: 16px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.08);"
+    style="
+      margin-bottom: 20px;
+      padding: 16px;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    "
   >
     <div
       class="filters-grid"
-      style="display: grid; grid-template-columns: repeat(4, minmax(180px, 1fr)); gap: 15px; align-items: end;"
+      style="
+        display: grid;
+        grid-template-columns: repeat(4, minmax(180px, 1fr));
+        gap: 15px;
+        align-items: end;
+      "
     >
       <div class="form-group">
         <label for="searchTitle">Search by title</label>
@@ -139,9 +172,11 @@
           (change)="updateSelectedTag($any($event.target).value)"
         >
           <option value="">All tags</option>
-          <option *ngFor="let tag of allTags()" [value]="tag">
-            {{ tag }}
-          </option>
+          @for (tag of allTags(); track tag) {
+            <option [value]="tag">
+              {{ tag }}
+            </option>
+          }
         </select>
       </div>
 
@@ -153,14 +188,16 @@
           (change)="updateSelectedUser($any($event.target).value)"
         >
           <option value="">All users</option>
-          <option *ngFor="let user of allUsers()" [value]="user">
-            {{ user }}
-          </option>
+          @for (user of allUsers(); track user) {
+            <option [value]="user">
+              {{ user }}
+            </option>
+          }
         </select>
       </div>
 
       <div class="form-group">
-        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer">
           <input
             type="checkbox"
             [checked]="onlyMyQuestions()"
@@ -169,186 +206,196 @@
           My questions only
         </label>
 
-        <button
-          type="button"
-          class="cancel-btn"
-          (click)="resetFilters()"
-          style="margin-top: 8px;"
-        >
+        <button type="button" class="cancel-btn" (click)="resetFilters()" style="margin-top: 8px">
           Reset Filters
         </button>
       </div>
     </div>
 
-    <div style="margin-top: 10px; color: #555;">
+    <div style="margin-top: 10px; color: #555">
       Showing {{ filteredQuestions().length }} of {{ questions().length }} questions
     </div>
   </div>
 
   <table class="questions-table">
     <thead>
-    <tr>
-      <th>Subject (Title &amp; Text)</th>
-      <th>Author</th>
-      <th class="text-center">Author Score</th>
-      <th class="text-center">Feedback</th>
-      <th class="text-center">Actions</th>
-    </tr>
+      <tr>
+        <th>Subject (Title &amp; Text)</th>
+        <th>Author</th>
+        <th class="text-center">Author Score</th>
+        <th class="text-center">Feedback</th>
+        <th class="text-center">Actions</th>
+      </tr>
     </thead>
 
     <tbody>
-    <ng-container *ngFor="let question of filteredQuestions()">
-      <tr *ngIf="editingQuestion()?.questionId === question.questionId; else viewRow">
-        <td class="question-content" colspan="4">
-          <div class="edit-form">
-            <input
-              class="edit-input"
-              type="text"
-              [ngModel]="editTitle()"
-              (ngModelChange)="editTitle.set($event)"
-              placeholder="Title"
-            />
-
-            <textarea
-              class="edit-textarea"
-              [ngModel]="editText()"
-              (ngModelChange)="editText.set($event)"
-              placeholder="Text"
-              rows="3"
-            ></textarea>
-
-            <div class="edit-actions">
-              <button
-                class="btn-save"
-                (click)="saveEdit()"
-                id="btn-save-edit"
-              >
-                Save
-              </button>
-
-              <button
-                class="btn-cancel"
-                (click)="cancelEdit()"
-                id="btn-cancel-edit"
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </td>
-        <td></td>
-      </tr>
-
-      <ng-template #viewRow>
-        <tr>
-          <td class="question-content">
-            <a
-              [routerLink]="['/answers/question', question.questionId]"
-              class="question-title-link"
-            >
-              {{ question.title }}
-            </a>
-
-            <div
-              class="question-images-preview"
-              *ngIf="question.imageUrls && question.imageUrls.length > 0"
-              style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px;"
-            >
-              <img
-                *ngFor="let imgUrl of question.imageUrls"
-                [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
-                alt="Question Image"
-                style="max-width: 100%; max-height: 300px; border-radius: 8px; border: 1px solid #eaeaea; object-fit: contain;"
-              />
-            </div>
-
-            <div class="text-preview" style="margin-top: 10px;">
-              {{ question.text }}
-            </div>
-
-            <div
-              class="question-tags"
-              *ngIf="question.tags && question.tags.length > 0"
-              style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap;"
-            >
-                <span
-                  *ngFor="let tag of question.tags"
-                  style="padding: 3px 8px; background: #eef2ff; border-radius: 12px; font-size: 12px;"
-                >
-                  {{ tag }}
-                </span>
-            </div>
-          </td>
-
-          <td class="author-info">
-            <a
-              [routerLink]="['/users', question.authorName]"
-              class="author-link"
-            >
-              {{ question.authorName }}
-            </a>
-          </td>
-
-          <td class="text-center">
-            -
-          </td>
-
-          <td class="text-center">
-            <div class="vote-section" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-              <button
-                *ngIf="!isAuthor(question)"
-                (click)="likeQuestion(question)"
-                style="background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-size: 16px;"
-                [style.backgroundColor]="question.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'"
-                [style.borderColor]="question.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
-              >
-                👍
-              </button>
-
-              <div class="score" style="font-weight: bold; font-size: 16px; min-width: 24px; text-align: center;">
-                {{ question.likes - question.dislikes }}
+      @for (question of filteredQuestions(); track question) {
+        @if (editingQuestion()?.questionId === question.questionId) {
+          <tr>
+            <td class="question-content" colspan="4">
+              <div class="edit-form">
+                <input
+                  class="edit-input"
+                  type="text"
+                  [ngModel]="editTitle()"
+                  (ngModelChange)="editTitle.set($event)"
+                  placeholder="Title"
+                />
+                <textarea
+                  class="edit-textarea"
+                  [ngModel]="editText()"
+                  (ngModelChange)="editText.set($event)"
+                  placeholder="Text"
+                  rows="3"
+                ></textarea>
+                <div class="edit-actions">
+                  <button class="btn-save" (click)="saveEdit()" id="btn-save-edit">Save</button>
+                  <button class="btn-cancel" (click)="cancelEdit()" id="btn-cancel-edit">
+                    Cancel
+                  </button>
+                </div>
               </div>
-
-              <button
-                *ngIf="!isAuthor(question)"
-                (click)="dislikeQuestion(question)"
-                style="background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-size: 16px;"
-                [style.backgroundColor]="question.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'"
-                [style.borderColor]="question.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'"
+            </td>
+            <td></td>
+          </tr>
+        } @else {
+          <tr>
+            <td class="question-content">
+              <a
+                [routerLink]="['/answers/question', question.questionId]"
+                class="question-title-link"
               >
-                👎
-              </button>
-            </div>
-          </td>
-
-          <td class="text-center">
-            <ng-container *ngIf="isAuthor(question)">
-              <button
-                class="btn-edit"
-                (click)="startEdit(question)"
-                [id]="'btn-edit-' + question.questionId"
+                {{ question.title }}
+              </a>
+              @if (question.imageUrls && question.imageUrls.length > 0) {
+                <div
+                  class="question-images-preview"
+                  style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px"
+                >
+                  @for (imgUrl of question.imageUrls; track imgUrl) {
+                    <img
+                      [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
+                      alt="Question Image"
+                      style="
+                        max-width: 100%;
+                        max-height: 300px;
+                        border-radius: 8px;
+                        border: 1px solid #eaeaea;
+                        object-fit: contain;
+                      "
+                    />
+                  }
+                </div>
+              }
+              <div class="text-preview" style="margin-top: 10px">
+                {{ question.text }}
+              </div>
+              @if (question.tags && question.tags.length > 0) {
+                <div
+                  class="question-tags"
+                  style="margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap"
+                >
+                  @for (tag of question.tags; track tag) {
+                    <span
+                      style="
+                        padding: 3px 8px;
+                        background: #eef2ff;
+                        border-radius: 12px;
+                        font-size: 12px;
+                      "
+                    >
+                      {{ tag }}
+                    </span>
+                  }
+                </div>
+              }
+            </td>
+            <td class="author-info">
+              <a [routerLink]="['/users', question.authorName]" class="author-link">
+                {{ question.authorName }}
+              </a>
+            </td>
+            <td class="text-center">-</td>
+            <td class="text-center">
+              <div
+                class="vote-section"
+                style="display: flex; align-items: center; justify-content: center; gap: 10px"
               >
-                Edit
-              </button>
+                @if (!isAuthor(question)) {
+                  <button
+                    (click)="likeQuestion(question)"
+                    style="
+                      background: none;
+                      border: 1px solid #ccc;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      padding: 4px 8px;
+                      font-size: 16px;
+                    "
+                    [style.backgroundColor]="
+                      question.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'
+                    "
+                    [style.borderColor]="question.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
+                  >
+                    👍
+                  </button>
+                }
+                <div
+                  class="score"
+                  style="font-weight: bold; font-size: 16px; min-width: 24px; text-align: center"
+                >
+                  {{ question.likes - question.dislikes }}
+                </div>
+                @if (!isAuthor(question)) {
+                  <button
+                    (click)="dislikeQuestion(question)"
+                    style="
+                      background: none;
+                      border: 1px solid #ccc;
+                      border-radius: 4px;
+                      cursor: pointer;
+                      padding: 4px 8px;
+                      font-size: 16px;
+                    "
+                    [style.backgroundColor]="
+                      question.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'
+                    "
+                    [style.borderColor]="
+                      question.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'
+                    "
+                  >
+                    👎
+                  </button>
+                }
+              </div>
+            </td>
+            <td class="text-center">
+              @if (isAuthor(question)) {
+                <button
+                  class="btn-edit"
+                  (click)="startEdit(question)"
+                  [id]="'btn-edit-' + question.questionId"
+                >
+                  Edit
+                </button>
+                <button
+                  class="btn-delete"
+                  (click)="deleteQuestion(question)"
+                  [id]="'btn-delete-' + question.questionId"
+                >
+                  Delete
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      }
 
-              <button
-                class="btn-delete"
-                (click)="deleteQuestion(question)"
-                [id]="'btn-delete-' + question.questionId"
-              >
-                Delete
-              </button>
-            </ng-container>
-          </td>
+      @if (filteredQuestions().length === 0) {
+        <tr>
+          <td colspan="5" class="text-center" style="padding: 20px">No questions found.</td>
         </tr>
-      </ng-template>
-    </ng-container>
-
-    <tr *ngIf="filteredQuestions().length === 0">
-      <td colspan="5" class="text-center" style="padding: 20px;">
-        No questions found.
-      </td>
-    </tr>
+      }
     </tbody>
   </table>
 </div>

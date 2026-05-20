@@ -1,14 +1,13 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { UserService } from '../../services/user.service';
 import { User } from '../../models/user.model';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-user-list',
   standalone: true,
-  imports: [CommonModule],
+  imports: [],
   templateUrl: './user-list.html',
-  styleUrl: './user-list.scss'
+  styleUrl: './user-list.scss',
 })
 export class UserList implements OnInit {
   private userService = inject(UserService);
@@ -33,7 +32,7 @@ export class UserList implements OnInit {
         this.errorMessage.set('Could not load users. Please try again later.');
         this.isLoading.set(false);
         console.error('API Error:', err);
-      }
+      },
     });
   }
 }
