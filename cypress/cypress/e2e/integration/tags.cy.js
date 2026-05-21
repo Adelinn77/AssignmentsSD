@@ -3,54 +3,76 @@
 // =============================================================
 
 describe('Tags API E2E Tests', () => {
+    const BASE = `${Cypress.env('tagApiUrl')}/api/tags`;
 
-    const testTag = { label: 'cypress-e2e-tag' };
-
-    beforeEach(() => { cy.deleteTagByLabel(testTag.label); });
-    afterEach(() => { cy.deleteTagByLabel(testTag.label); cy.deleteTagByLabel('cypress-updated-tag'); });
+    const makeTag = () => ({
+        label: `cypress-e2e-tag-${Date.now()}-${Math.floor(Math.random() * 100000)}`
+    });
 
     it('POST /api/tags → should create a new tag (201)', () => {
-        cy.request('POST', '/api/tags', testTag).then((response) => {
+        const tag = makeTag();
+
+        cy.request('POST', BASE, tag).then((response) => {
             expect(response.status).to.eq(201);
-            expect(response.body).to.have.property('label', testTag.label);
+            expect(response.body).to.have.property('label', tag.label);
         });
     });
 
     it('POST /api/tags → should return 409 when label already exists', () => {
-        cy.createTag(testTag);
-        cy.request({ method: 'POST', url: '/api/tags', body: testTag, failOnStatusCode: false }).then((response) => {
-            expect(response.status).to.eq(409);
+        const tag = makeTag();
+
+        cy.request('POST', BASE, tag).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request({ method: 'POST', url: BASE, body: tag, failOnStatusCode: false }).then((response) => {
+                expect(response.status).to.eq(409);
+            });
         });
     });
 
     it('GET /api/tags → should return an array of tags (200)', () => {
-        cy.request('GET', '/api/tags').then((response) => {
+        cy.request('GET', BASE).then((response) => {
             expect(response.status).to.eq(200);
             expect(response.body).to.be.an('array');
         });
     });
 
     it('GET /api/tags/label/{label} → should return tag by label (200)', () => {
-        cy.createTag(testTag);
-        cy.request('GET', `/api/tags/label/${testTag.label}`).then((response) => {
-            expect(response.status).to.eq(200);
-            expect(response.body).to.have.property('label', testTag.label);
+        const tag = makeTag();
+
+        cy.request('POST', BASE, tag).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request('GET', `${BASE}/label/${encodeURIComponent(tag.label)}`).then((response) => {
+                expect(response.status).to.eq(200);
+                expect(response.body).to.have.property('label', tag.label);
+            });
         });
     });
 
     it('PUT /api/tags/{id} → should update tag label (200)', () => {
-        cy.request('POST', '/api/tags', testTag).then((createRes) => {
-            cy.request('PUT', `/api/tags/${createRes.body.id}`, { id: createRes.body.id, label: 'cypress-updated-tag' }).then((response) => {
+        const tag = makeTag();
+        const updatedLabel = `updated-${tag.label}`;
+
+        cy.request('POST', BASE, tag).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request('PUT', `${BASE}/${createRes.body.id}`, { id: createRes.body.id, label: updatedLabel }).then((response) => {
                 expect(response.status).to.eq(200);
-                expect(response.body).to.have.property('label', 'cypress-updated-tag');
+                expect(response.body).to.have.property('label', updatedLabel);
             });
         });
     });
 
     it('DELETE /api/tags/label/{label} → should delete tag (200)', () => {
-        cy.createTag(testTag);
-        cy.request('DELETE', `/api/tags/label/${testTag.label}`).then((response) => {
-            expect(response.status).to.eq(200);
+        const tag = makeTag();
+
+        cy.request('POST', BASE, tag).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request('DELETE', `${BASE}/label/${encodeURIComponent(tag.label)}`).then((response) => {
+                expect(response.status).to.eq(200);
+            });
         });
     });
 });

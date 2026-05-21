@@ -1,98 +1,68 @@
-describe('Integration Flow — Question + Answer', () => {
+// =============================================================
+// Full API Integration Flow
+// =============================================================
 
-    const BASE_Q = '/api/questions';
-    const BASE_A = '/api/answers';
-
-    const EXISTING_USER_ID = 1;
-    const EXISTING_QUESTION_ID = 1; // din seed / data.sql
-
-    const AUTHOR = `flow_user_${Date.now()}`;
-
-    const makeFlowQuestion = () => {
-        const unique = Date.now() + '_' + Math.floor(Math.random() * 100000);
-
-        return {
-            title: `Flow Question ${unique}`,
-            text: 'Flow content',
-            authorName: AUTHOR,
-            status: 'RECEIVED',
-            tags: []
-        };
-    };
+describe('Forum Integration Flow', () => {
+    let questionAuthor;
+    let answerAuthor;
+    let voter;
+    let question;
+    let answer;
 
     before(() => {
-        cy.request({
-            method: 'DELETE',
-            url: `/api/users/${AUTHOR}`,
-            failOnStatusCode: false
-        });
-
-        cy.request({
-            method: 'POST',
-            url: '/api/users',
-            body: {
-                username: AUTHOR,
-                email: `${AUTHOR}@test.com`,
-                phone: '0700000000',
-                firstName: 'Flow',
-                lastName: 'User'
-            },
-            failOnStatusCode: false
-        }).then((res) => {
-            expect(res.status).to.be.oneOf([200, 201, 409]);
-        });
+        cy.registerUser({ username: `flow_question_author_${Date.now()}` }).then((user) => { questionAuthor = user; });
+        cy.registerUser({ username: `flow_answer_author_${Date.now()}` }).then((user) => { answerAuthor = user; });
+        cy.registerUser({ username: `flow_voter_${Date.now()}` }).then((user) => { voter = user; });
     });
 
-    it('complete flow: create question -> verify question -> create answer -> verify answers list', () => {
+    it('creates a question, adds answer, votes, accepts answer, and deletes data', () => {
+        cy.createQuestionAs(questionAuthor.auth, {
+            authorName: questionAuthor.username,
+            title: `Flow Question ${Date.now()}`,
+            text: 'Question from full flow.',
+            status: 'RECEIVED',
+            tags: []
+        }).then((questionRes) => {
+            expect(questionRes.status).to.eq(201);
+            question = questionRes.body;
 
-        const question = makeFlowQuestion();
+            return cy.createAnswerAs(answerAuthor.auth, {
+                questionId: question.questionId,
+                authorName: answerAuthor.username,
+                text: 'Flow answer.'
+            });
+        }).then((answerRes) => {
+            expect(answerRes.status).to.eq(201);
+            answer = answerRes.body;
 
-        cy.request({
-            method: 'POST',
-            url: BASE_Q,
-            body: question,
-            failOnStatusCode: false
-        }).then((qRes) => {
-            expect(qRes.status).to.eq(201);
-            expect(qRes.body).to.exist;
-            expect(qRes.body.title).to.eq(question.title);
-            expect(qRes.body.text).to.eq(question.text);
-            expect(qRes.body.authorName).to.eq(AUTHOR);
-            expect(qRes.body.status).to.eq('RECEIVED');
-
-            cy.request({
-                method: 'GET',
-                url: `${BASE_Q}/title/${encodeURIComponent(question.title)}`,
-                failOnStatusCode: false
-            }).then((getQuestionRes) => {
-                expect(getQuestionRes.status).to.eq(200);
-                expect(getQuestionRes.body).to.exist;
-                expect(getQuestionRes.body.title).to.eq(question.title);
+            cy.request({ method: 'GET', url: `/api/answers/question/${question.questionId}`, auth: questionAuthor.auth }).then((listRes) => {
+                expect(listRes.status).to.eq(200);
+                expect(listRes.body.some((a) => a.answerId === answer.answerId)).to.eq(true);
             });
 
-            cy.request({
-                method: 'POST',
-                url: BASE_A,
-                body: {
-                    userId: EXISTING_USER_ID,
-                    questionId: EXISTING_QUESTION_ID
-                },
-                failOnStatusCode: false
-            }).then((aRes) => {
-                expect(aRes.status).to.eq(500);
-                expect(aRes.body).to.exist;
+            cy.request({ method: 'PUT', url: `/api/questions/${question.questionId}/like?username=${voter.username}`, auth: voter.auth }).then((likeQuestionRes) => {
+                expect(likeQuestionRes.status).to.eq(200);
+                expect(likeQuestionRes.body.likes).to.eq(1);
+            });
 
-                cy.request({
-                    method: 'GET',
-                    url: BASE_A
-                }).then((listRes) => {
-                    expect(listRes.status).to.eq(200);
-                    expect(listRes.body).to.be.an('array');
-                    expect(listRes.body.length).to.be.at.least(0);
-                });
+            cy.request({ method: 'PUT', url: `/api/answers/${answer.answerId}/like?username=${voter.username}`, auth: voter.auth }).then((likeAnswerRes) => {
+                expect(likeAnswerRes.status).to.eq(200);
+                expect(likeAnswerRes.body.likes).to.eq(1);
+            });
+
+            cy.request({ method: 'PUT', url: `/api/answers/${answer.answerId}/accept?username=${questionAuthor.username}`, auth: questionAuthor.auth }).then((acceptRes) => {
+                expect(acceptRes.status).to.eq(200);
+                expect(acceptRes.body.accepted).to.eq(true);
+            });
+
+            cy.request({ method: 'GET', url: `/api/questions/${question.questionId}`, auth: questionAuthor.auth }).then((questionGetRes) => {
+                expect(questionGetRes.status).to.eq(200);
+                expect(questionGetRes.body.status).to.eq('RESOLVED');
+            });
+
+            cy.request({ method: 'DELETE', url: `/api/questions/title/${encodeURIComponent(question.title)}`, auth: questionAuthor.auth }).then((deleteRes) => {
+                expect(deleteRes.status).to.eq(200);
             });
         });
-
     });
-
 });

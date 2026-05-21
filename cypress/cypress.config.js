@@ -1,24 +1,31 @@
-const { defineConfig } = require("cypress");
+const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
-  reporter: "mochawesome",
+  reporter: 'mochawesome',
 
   reporterOptions: {
-    reportDir: "cypress/reports",
+    reportDir: 'cypress/reports',
     overwrite: false,
     html: true,
     json: true,
   },
 
   e2e: {
-    baseUrl: "http://localhost:8080",
-    specPattern: "cypress/e2e/**/*.cy.js",
-    supportFile: "cypress/support/commands.js",
+    baseUrl: 'http://localhost:8080',
+    specPattern: 'cypress/e2e/**/*.cy.js',
+    supportFile: 'cypress/support/commands.js',
+    defaultCommandTimeout: 10000,
+    requestTimeout: 10000,
+    responseTimeout: 30000,
+    env: {
+      apiUrl: 'http://localhost:8080',
+      tagApiUrl: 'http://localhost:8081',
+      frontendUrl: 'http://localhost:4200',
+      defaultPassword: 'TestPassword123!',
+    },
 
     setupNodeEvents(on, config) {
       return config;
     },
   },
-
-
 });
