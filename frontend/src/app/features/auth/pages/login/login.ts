@@ -33,7 +33,7 @@ export class Login {
     this.isLoading.set(true);
     this.errorMsg.set(null);
 
-    localStorage.removeItem('userToken');
+    sessionStorage.removeItem('userToken');
 
     const credentials = btoa(`${name}:${pass}`);
     const headers = new HttpHeaders({

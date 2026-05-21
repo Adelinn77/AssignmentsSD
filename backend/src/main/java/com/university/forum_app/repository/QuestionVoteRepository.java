@@ -13,4 +13,11 @@ public interface QuestionVoteRepository extends CrudRepository<QuestionVote, Lon
     long countByQuestionAndIsLike(Question question, boolean isLike);
 
     void deleteByQuestion(Question question);
+    // Count upvotes on questions authored by a specific user
+    @Query("SELECT COUNT(v) FROM QuestionVote v WHERE v.question.author.id = :authorId AND v.isLike = true")
+    long countUpvotesOnQuestionsByAuthor(Long authorId);
+
+    // Count downvotes on questions authored by a specific user
+    @Query("SELECT COUNT(v) FROM QuestionVote v WHERE v.question.author.id = :authorId AND v.isLike = false")
+    long countDownvotesOnQuestionsByAuthor(Long authorId);
 }

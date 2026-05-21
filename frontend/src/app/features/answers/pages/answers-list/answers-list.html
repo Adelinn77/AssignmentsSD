@@ -1,74 +1,34 @@
-@if (!isLoading() && !errorMessage()) {
-  <div class="question-answer-container">
-    <a routerLink="/questions" class="back-link">← Back to Questions</a>
+<div class="question-answer-container" *ngIf="!isLoading() && !errorMessage()">
 
-    @if (question()) {
-      <div class="question-card">
-        @if (!isEditingQuestion()) {
-          <div class="question-header">
-            <div class="author-section">
-              <div class="author-info">
-                <span class="author-name">{{ question()!.authorName }}</span>
-                <span class="question-date">
-                  {{ question()!.date | date: 'dd MMM yyyy, HH:mm' }}
-                </span>
-              </div>
-            </div>
+  <a routerLink="/questions" class="back-link">← Back to Questions</a>
 
-            <div class="status-badge" [ngClass]="getStatusClass(question()!.status.toString())">
-              {{ getStatusLabel(question()!.status.toString()) }}
-            </div>
+  <div class="question-card" *ngIf="question()">
+
+    <ng-container *ngIf="!isEditingQuestion()">
+      <div class="question-header">
+        <div class="author-section">
+          <div class="author-info">
+            <span class="author-name">{{ question()!.authorName }}</span>
+            <span
+              class="author-score"
+              [style.color]="(question()!.authorScore ?? 0) > 0 ? '#28a745' : (question()!.authorScore ?? 0) < 0 ? '#dc3545' : '#6c757d'"
+              style="font-weight: bold; font-size: 13px; margin-left: 8px;"
+              title="Author reputation score"
+            >
+              ({{ question()!.authorScore ?? 0 }} pts)
+            </span>
+            <span class="question-date">{{ question()!.date | date:'dd MMM yyyy, HH:mm' }}</span>
           </div>
+        </div>
+      </div>
 
-          <div class="question-body">
-            <h1 class="question-title">{{ question()!.title }}</h1>
-            <p class="question-text">{{ question()!.text }}</p>
-
-            @if (question()!.imageUrls && question()!.imageUrls.length > 0) {
-              <div
-                class="question-images"
-                style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px"
-              >
-                @for (imgUrl of question()!.imageUrls; track imgUrl) {
-                  <img
-                    [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
-                    alt="Question Attached Image"
-                    (click)="openFullscreen('http://localhost:8080/uploads/questions/' + imgUrl)"
-                    (keydown.enter)="openFullscreen('http://localhost:8080/uploads/questions/' + imgUrl)"
-                    tabindex="0"
-                    style="
-                      max-width: 100%;
-                      max-height: 500px;
-                      border-radius: 8px;
-                      border: 1px solid #ddd;
-                      object-fit: contain;
-                      align-self: flex-start;
-                      cursor: pointer;
-                      transition: opacity 0.2s;
-                    "
-                    onmouseover="this.style.opacity = '0.85'"
-                    onmouseout="this.style.opacity = '1'"
-                  />
-                }
-              </div>
-            }
-          </div>
-
-          @if (question()!.tags && question()!.tags.length > 0) {
-            <div class="tags-section">
-              <strong>Tags:</strong> {{ question()!.tags.join(', ') }}
-            </div>
-          }
-
+      <div class="question-body">
+        <h1 class="question-title">{{ question()!.title }}</h1>
+        <p class="question-text">{{ question()!.text }}</p>
+        @if (question()!.imageUrls && question()!.imageUrls.length > 0) {
           <div
-            class="vote-actions"
-            style="
-              display: flex;
-              align-items: center;
-              justify-content: flex-start;
-              gap: 15px;
-              margin-bottom: 20px;
-            "
+            class="question-images"
+            style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px"
           >
             @if (!isQuestionAuthor()) {
               <button
@@ -145,7 +105,119 @@
               </button>
             </div>
           </div>
+            @for (imgUrl of question()!.imageUrls; track imgUrl) {
+              <img
+                [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
+                alt="Question Attached Image"
+                (click)="openFullscreen('http://localhost:8080/uploads/questions/' + imgUrl)"
+                (keydown.enter)="openFullscreen('http://localhost:8080/uploads/questions/' + imgUrl)"
+                tabindex="0"
+                style="
+                  max-width: 100%;
+                  max-height: 500px;
+                  border-radius: 8px;
+                  border: 1px solid #ddd;
+                  object-fit: contain;
+                  align-self: flex-start;
+                  cursor: pointer;
+                  transition: opacity 0.2s;
+                "
+                onmouseover="this.style.opacity = '0.85'"
+                onmouseout="this.style.opacity = '1'"
+              />
+            }
+          </div>
         }
+      </div>
+
+      @if (question()!.tags && question()!.tags.length > 0) {
+        <div class="tags-section"><strong>Tags:</strong> {{ question()!.tags.join(', ') }}</div>
+      }
+
+      <div
+        class="vote-actions"
+        style="
+          display: flex;
+          align-items: center;
+          justify-content: flex-start;
+          gap: 15px;
+          margin-bottom: 20px;
+        "
+      >
+        @if (!isQuestionAuthor()) {
+          <button
+            class="vote-btn like-btn"
+            (click)="likeQuestion()"
+            id="btn-like-question"
+            [style.backgroundColor]="
+              question()!.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'
+            "
+            [style.borderColor]="question()!.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
+            style="padding: 8px 12px; border-radius: 6px; cursor: pointer"
+          >
+            <span class="vote-icon" style="font-size: 20px">👍</span>
+          </button>
+        }
+        <div
+          class="score"
+          style="font-weight: bold; font-size: 20px; text-align: center; min-width: 30px"
+        >
+          {{ question()!.likes - question()!.dislikes }}
+        </div>
+        @if (!isQuestionAuthor()) {
+          <button
+            class="vote-btn dislike-btn"
+            (click)="dislikeQuestion()"
+            id="btn-dislike-question"
+            [style.backgroundColor]="
+              question()!.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'
+            "
+            [style.borderColor]="question()!.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'"
+            style="padding: 8px 12px; border-radius: 6px; cursor: pointer"
+          >
+            <span class="vote-icon" style="font-size: 20px">👎</span>
+          </button>
+        }
+      </div>
+
+      @if (isQuestionAuthor()) {
+        <div class="author-actions">
+          <button class="btn-edit" (click)="startEditQuestion()" id="btn-edit-question">
+            Edit
+          </button>
+          <button class="btn-delete" (click)="deleteQuestion()" id="btn-delete-question">
+            Delete
+          </button>
+        </div>
+      }
+    </ng-container>
+
+    @if (isEditingQuestion()) {
+      <div class="edit-form">
+        <strong>Title</strong>
+        <input
+          class="edit-input"
+          type="text"
+          [ngModel]="editTitle()"
+          (ngModelChange)="editTitle.set($event)"
+          placeholder="Title"
+        />
+        <strong>Text</strong>
+        <textarea
+          class="edit-textarea"
+          [ngModel]="editText()"
+          (ngModelChange)="editText.set($event)"
+          placeholder="Text"
+          rows="4"
+        ></textarea>
+        <div class="edit-actions">
+          <button class="btn-save" (click)="saveEditQuestion()" id="btn-save-question">
+            Save
+          </button>
+          <button class="btn-cancel" (click)="cancelEditQuestion()" id="btn-cancel-question">
+            Cancel
+          </button>
+        </div>
       </div>
     }
 
@@ -164,116 +236,62 @@
       </div>
 
       @if (showAddAnswerPanel()) {
-        <div
-          class="add-answer-panel"
-          style="
-            margin-top: 15px;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-          "
-        >
-          <div class="panel-content">
-            <h3 style="margin-top: 0">Add New Response</h3>
-
-            @if (errorMessage()) {
-              <div class="error-message">
-                {{ errorMessage() }}
+        <div class="add-answer-panel" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
+          <div class="form-group">
+            <label for="answerText">Your Answer</label>
+            <textarea
+              id="answerText"
+              [value]="newAnswerText()"
+              (input)="newAnswerText.set($any($event.target).value)"
+              placeholder="Write your answer here..."
+              rows="8"
+            ></textarea>
+          </div>
+          <div class="form-group">
+            <strong>Attachments</strong>
+            @if (selectedAnswerImages().length > 0) {
+              <div class="image-previews-container" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px">
+                @for (img of selectedAnswerImages(); track img; let i = $index) {
+                  <div style="position: relative; display: inline-block">
+                    <img
+                      [src]="img.url"
+                      alt="Preview"
+                      style="max-height: 150px; border-radius: 8px; border: 1px solid #ddd; object-fit: cover;"
+                    />
+                    <button
+                      type="button"
+                      (click)="removeAnswerImage(i)"
+                      title="Remove image"
+                      style="position: absolute; top: -10px; right: -10px; background: #ff4444; color: white; border: none; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                }
               </div>
             }
-
-            <div class="form-group">
-              <label for="answerText">Your Answer</label>
-              <textarea
-                id="answerText"
-                [value]="newAnswerText()"
-                (input)="newAnswerText.set($any($event.target).value)"
-                placeholder="Write your answer here..."
-                rows="8"
-              ></textarea>
+            <div class="file-upload-actions" style="margin-bottom: 10px">
+              <input
+                type="file"
+                multiple
+                accept="image/*"
+                (change)="onAnswerImagesSelected($event)"
+                #answerFileInput
+                style="display: none"
+              />
+              <button
+                type="button"
+                class="btn-add-image"
+                (click)="answerFileInput.click()"
+                style="padding: 8px 15px; cursor: pointer; background: #f0f2f5; border: 1px solid #ccc; border-radius: 6px;"
+              >
+                📷 Add Images
+              </button>
             </div>
-
-            <div class="form-group">
-              <strong>Attachments</strong>
-
-              @if (selectedAnswerImages().length > 0) {
-                <div
-                  class="image-previews-container"
-                  style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px"
-                >
-                  @for (img of selectedAnswerImages(); track img; let i = $index) {
-                    <div style="position: relative; display: inline-block">
-                      <img
-                        [src]="img.url"
-                        alt="Preview"
-                        style="
-                          max-height: 150px;
-                          border-radius: 8px;
-                          border: 1px solid #ddd;
-                          object-fit: cover;
-                        "
-                      />
-                      <button
-                        type="button"
-                        (click)="removeAnswerImage(i)"
-                        title="Remove image"
-                        style="
-                          position: absolute;
-                          top: -10px;
-                          right: -10px;
-                          background: #ff4444;
-                          color: white;
-                          border: none;
-                          border-radius: 50%;
-                          width: 28px;
-                          height: 28px;
-                          cursor: pointer;
-                          font-weight: bold;
-                          display: flex;
-                          align-items: center;
-                          justify-content: center;
-                          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
-                        "
-                      >
-                        ✕
-                      </button>
-                    </div>
-                  }
-                </div>
-              }
-
-              <div class="file-upload-actions" style="margin-bottom: 10px">
-                <input
-                  type="file"
-                  multiple
-                  accept="image/*"
-                  (change)="onAnswerImagesSelected($event)"
-                  #answerFileInput
-                  style="display: none"
-                />
-                <button
-                  type="button"
-                  class="btn-add-image"
-                  (click)="answerFileInput.click()"
-                  style="
-                    padding: 8px 15px;
-                    cursor: pointer;
-                    background: #f0f2f5;
-                    border: 1px solid #ccc;
-                    border-radius: 6px;
-                  "
-                >
-                  📷 Add Images
-                </button>
-              </div>
-            </div>
-
-            <div class="panel-actions">
-              <button (click)="postAnswer()" class="post-btn">Post Answer</button>
-              <button (click)="closeAddAnswerPanel()" class="cancel-btn">Cancel</button>
-            </div>
+          </div>
+          <div class="panel-actions">
+            <button (click)="postAnswer()" class="post-btn">Post Answer</button>
+            <button (click)="closeAddAnswerPanel()" class="cancel-btn">Cancel</button>
           </div>
         </div>
       }
@@ -283,8 +301,8 @@
           <p>No answers yet. Be the first to answer!</p>
         </div>
       }
-
-      @for (answer of answers(); track answer; let i = $index) {
+      @for (answer of sortedAnswers(); track answer; let i = $index) {
+        <!-- Edit mode for this answer -->
         @if (editingAnswer()?.answerId === answer.answerId) {
           <div class="answer-card">
             <div class="edit-form">
@@ -331,9 +349,17 @@
                 </div>
                 <div class="answer-author-info">
                   <span class="answer-author-name">{{ answer.authorName || 'Anonymous' }}</span>
-                  <span class="answer-date">
-                    {{ answer.dateTime | date: 'dd MMM yyyy, HH:mm' }}
+                  <span
+                    class="author-score"
+                    [style.color]="(answer.authorScore ?? 0) > 0 ? '#28a745' : (answer.authorScore ?? 0) < 0 ? '#dc3545' : '#6c757d'"
+                    style="font-weight: bold; font-size: 13px; margin-left: 8px;"
+                    title="Author reputation score"
+                  >
+                    ({{ (answer.authorScore ?? 0) % 1 === 0 ? (answer.authorScore ?? 0) : (answer.authorScore ?? 0 | number:'1.1-1') }} pts)
                   </span>
+                  <span class="answer-date">{{
+                    answer.dateTime | date: 'dd MMM yyyy, HH:mm'
+                  }}</span>
                 </div>
               </div>
 
@@ -478,7 +504,7 @@
       }
     </div>
   </div>
-}
+</div>
 
 @if (isLoading()) {
   <div class="loading-container">

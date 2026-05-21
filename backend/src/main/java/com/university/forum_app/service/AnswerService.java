@@ -47,12 +47,20 @@ public class AnswerService {
     @Value("${app.upload.dir.answers:uploads/answers}")
     private String uploadDir;
 
+    @Autowired
+    private UserScoreService userScoreService;
+
     private AnswerDTO mapEntityToDTO(Answer answer) {
+        Double authorScore = null;
+        if (answer.getAuthor() != null) {
+            authorScore = userScoreService.calculateScore(answer.getAuthor().getId());
+        }
         return AnswerDTO.builder()
                 .answerId(answer.getId())
                 .questionId(answer.getQuestion() != null ? answer.getQuestion().getId() : null)
                 .userId(answer.getAuthor() != null ? answer.getAuthor().getId() : null)
                 .authorName(answer.getAuthor() != null ? answer.getAuthor().getUsername() : null)
+                .authorScore(authorScore)
                 .text(answer.getText())
                 .likes(answer.getLikes())
                 .dislikes(answer.getDislikes())

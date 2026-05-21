@@ -17,6 +17,9 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private com.university.forum_app.service.UserScoreService userScoreService;
+
     @PostMapping
     public ResponseEntity<Object> createUser(@RequestBody UserDTO userDTO) {
         try {
@@ -92,6 +95,14 @@ public class UserController {
             return new ResponseEntity<>(unblockedUser, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+
+    @GetMapping("/{username}/score")
+    public ResponseEntity<Object> getUserScore(@PathVariable String username) {
+        try {
+            double score = userScoreService.calculateScore(username);
+            return new ResponseEntity<>(score, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 }

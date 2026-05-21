@@ -1,5 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QuestionService } from '../../services/question.service';
 import { Question } from '../../models/question.model';
@@ -9,7 +10,7 @@ import { Status } from '../../models/question.model';
 @Component({
   selector: 'app-question-list',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, CommonModule],
   templateUrl: './question-list.html',
   styleUrl: './question-list.scss',
 })
@@ -86,6 +87,12 @@ export class QuestionList implements OnInit {
       const matchesOnlyMyQuestions = !onlyMine || (currentUser !== '' && author === currentUser);
 
       return matchesTitle && matchesTag && matchesUser && matchesOnlyMyQuestions;
+    })
+    .sort((a, b) => {
+      const dateA = new Date(a.date || 0).getTime();
+      const dateB = new Date(b.date || 0).getTime();
+
+      return dateB - dateA;
     });
   });
 
@@ -319,5 +326,15 @@ export class QuestionList implements OnInit {
         this.isLoading.set(false);
       },
     });
+  }
+
+  fullscreenImageUrl = signal<string | null>(null);
+
+  openFullscreen(url: string): void {
+    this.fullscreenImageUrl.set(url);
+  }
+
+  closeFullscreen(): void {
+    this.fullscreenImageUrl.set(null);
   }
 }

@@ -6,4 +6,5 @@ export interface User {
   lastName: string;
   role?: 'USER' | 'ADMIN';
   accessRestricted?: boolean;
+  score?: number;
 }

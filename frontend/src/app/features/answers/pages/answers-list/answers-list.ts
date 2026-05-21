@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
@@ -24,6 +24,14 @@ export class AnswersList implements OnInit {
 
   question = signal<Question | null>(null);
   answers = signal<Answer[]>([]);
+  sortedAnswers = computed<Answer[]>(() => {
+    return [...this.answers()].sort((a, b) => {
+      const scoreA = (a.likes || 0) - (a.dislikes || 0);
+      const scoreB = (b.likes || 0) - (b.dislikes || 0);
+
+      return scoreB - scoreA;
+    });
+  });
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
   showAddAnswerPanel = signal<boolean>(false);
