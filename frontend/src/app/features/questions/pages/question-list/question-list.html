@@ -281,6 +281,30 @@
                   }
                 </div>
               }
+              @if (question.imageUrls && question.imageUrls.length > 0) {
+                <div class="question-images-list" style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                  @for (imgUrl of question.imageUrls; track imgUrl) {
+                    <img
+                      [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
+                      alt="Question Attached Image"
+                      (click)="openFullscreen('http://localhost:8080/uploads/questions/' + imgUrl)"
+                      (keydown.enter)="openFullscreen('http://localhost:8080/uploads/questions/' + imgUrl)"
+                      tabindex="0"
+                      style="
+                        width: 80px;
+                        height: 80px;
+                        border-radius: 6px;
+                        border: 1px solid #ddd;
+                        object-fit: cover;
+                        cursor: pointer;
+                        transition: opacity 0.2s, transform 0.2s;
+                      "
+                      onmouseover="this.style.opacity = '0.85'; this.style.transform = 'scale(1.05)';"
+                      onmouseout="this.style.opacity = '1'; this.style.transform = 'scale(1)';"
+                    />
+                  }
+                </div>
+              }
             </td>
 
             <td class="author-info">
@@ -365,3 +389,61 @@
     </tbody>
   </table>
 </div>
+@if (fullscreenImageUrl()) {
+  <div
+    class="fullscreen-overlay"
+    style="
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.9);
+      z-index: 9999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    "
+    (click)="closeFullscreen()"
+    (keydown.enter)="closeFullscreen()"
+    tabindex="0"
+  >
+    <button
+      type="button"
+      title="Close"
+      style="
+        position: absolute;
+        top: 20px;
+        left: 30px;
+        background: transparent;
+        color: white;
+        border: none;
+        font-size: 45px;
+        cursor: pointer;
+        z-index: 10000;
+        padding: 0;
+        line-height: 1;
+        opacity: 0.8;
+      "
+      onmouseover="this.style.opacity = '1'"
+      onmouseout="this.style.opacity = '0.8'"
+      (click)="closeFullscreen(); $event.stopPropagation()"
+    >
+      &times;
+    </button>
+    <img
+      [src]="fullscreenImageUrl()"
+      alt="Fullscreen Image"
+      style="
+        max-width: 90vw;
+        max-height: 90vh;
+        object-fit: contain;
+        box-shadow: 0 0 25px rgba(0, 0, 0, 0.8);
+        border-radius: 4px;
+      "
+      (click)="$event.stopPropagation()"
+      (keydown.enter)="$event.stopPropagation()"
+      tabindex="0"
+    />
+  </div>
+}
