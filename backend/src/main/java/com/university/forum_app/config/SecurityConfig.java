@@ -37,7 +37,7 @@ public class SecurityConfig {
                 )
                 .httpBasic(basic -> basic.authenticationEntryPoint(
                         (request, response, authException) -> {
-                            if (authException instanceof DisabledException) {
+                            if (isDisabledException(authException)) {
                                 response.sendError(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN, "Your account has been blocked.");
                             } else {
                                 response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
@@ -50,6 +50,18 @@ public class SecurityConfig {
                 ));
 
         return http.build();
+    }
+
+    private boolean isDisabledException(Throwable throwable) {
+        while (throwable != null) {
+            if (throwable instanceof DisabledException) {
+                return true;
+            }
+
+            throwable = throwable.getCause();
+        }
+
+        return false;
     }
 
     @Bean

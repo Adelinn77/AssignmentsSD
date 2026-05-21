@@ -14,16 +14,22 @@ import java.util.Collections;
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final NotificationService notificationService;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
+    public CustomUserDetailsService(UserRepository userRepository, NotificationService notificationService) {
         this.userRepository = userRepository;
+        this.notificationService = notificationService;
     }
 
     @Override
     public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
         if (user == null) {
-            throw  new UsernameNotFoundException("User not found: " + username);
+            throw new UsernameNotFoundException("User not found: " + username);
+        }
+
+        if (user.isAccessRestricted()) {
+            notificationService.sendAccountBlockedNotifications(user.getUsername());
         }
 
         Role role = user.getRole() != null ? user.getRole() : Role.USER;
