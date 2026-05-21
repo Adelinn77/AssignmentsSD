@@ -22,13 +22,21 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private UserScoreService userScoreService;
+
     private UserDTO mapEntityToDTO(User user) {
+        Double score = null;
+        if (user.getId() != null) {
+            score = userScoreService.calculateScore(user.getId());
+        }
         return UserDTO.builder()
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .phone(user.getPhone())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .score(score)
                 .build();
     }
 

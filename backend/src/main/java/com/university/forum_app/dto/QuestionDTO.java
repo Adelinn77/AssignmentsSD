@@ -27,6 +27,7 @@ public class QuestionDTO {
 
 
     private String authorName;
+    private Double authorScore;
 
     private List<String> tags;
 

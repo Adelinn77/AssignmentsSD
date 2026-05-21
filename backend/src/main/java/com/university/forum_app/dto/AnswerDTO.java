@@ -24,4 +24,5 @@ public class AnswerDTO {
     private String currentUserVote;
     private boolean accepted;
     private List<String> imageUrls;
+    private Double authorScore;
 }

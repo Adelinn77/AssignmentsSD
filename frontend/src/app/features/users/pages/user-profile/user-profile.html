@@ -11,7 +11,10 @@
     <div class="profile-header">
       <h1>{{ u.firstName }} {{ u.lastName }}</h1>
       <span class="username-tag">@{{ u.username }}</span>
-      <span class="score-badge">Reputation Score: 0</span>
+      <span class="score-badge"
+            [style.color]="(u.score ?? 0) > 0 ? '#28a745' : (u.score ?? 0) < 0 ? '#dc3545' : '#6c757d'">
+        Reputation Score: {{ u.score ?? 0 }}
+      </span>
     </div>
 
     <div class="contact-info">

@@ -39,10 +39,17 @@ public class QuestionService {
     @Autowired
     private QuestionVoteRepository questionVoteRepository;
 
+    @Autowired
+    private UserScoreService userScoreService;
+
     @Value("${app.upload.dir.questions:uploads/questions}")
     private String uploadDir;
 
     private QuestionDTO mapEntityToDTO(Question question) {
+        Double authorScore = null;
+        if (question.getAuthor() != null) {
+            authorScore = userScoreService.calculateScore(question.getAuthor().getId());
+        }
         return QuestionDTO.builder()
                 .questionId(question.getId())
                 .title(question.getTitle())
@@ -50,6 +57,7 @@ public class QuestionService {
                 .date(question.getDate())
                 .status(question.getStatus())
                 .authorName(question.getAuthor() != null ? question.getAuthor().getUsername() : null)
+                .authorScore(authorScore)
                 .tags(question.getTags() != null ? question.getTags().stream().map(Tag::getLabel).toList() : new ArrayList<>())
                 .imageUrls(question.getImages() != null ? question.getImages().stream().map(QuestionImage::getImageUrl).toList() : new ArrayList<>())
                 .likes(question.getLikes())

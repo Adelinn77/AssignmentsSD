@@ -13,4 +13,16 @@ public interface AnswerVoteRepository extends CrudRepository<AnswerVote, Long> {
     long countByAnswerAndIsLike(Answer answer, boolean isLike);
 
     void deleteByAnswer(Answer answer);
+
+    // Count upvotes on answers authored by a specific user
+    @Query("SELECT COUNT(v) FROM AnswerVote v WHERE v.answer.author.id = :authorId AND v.isLike = true")
+    long countUpvotesOnAnswersByAuthor(Long authorId);
+
+    // Count downvotes on answers authored by a specific user
+    @Query("SELECT COUNT(v) FROM AnswerVote v WHERE v.answer.author.id = :authorId AND v.isLike = false")
+    long countDownvotesOnAnswersByAuthor(Long authorId);
+
+    // Count downvotes cast by a user on OTHER users' answers (voter penalty)
+    @Query("SELECT COUNT(v) FROM AnswerVote v WHERE v.user.id = :voterId AND v.isLike = false AND v.answer.author.id <> :voterId")
+    long countDownvotesCastByUserOnOthers(Long voterId);
 }

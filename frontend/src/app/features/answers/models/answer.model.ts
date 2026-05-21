@@ -3,6 +3,7 @@ export interface Answer {
   questionId: number;
   userId: number;
   authorName: string;
+  authorScore?: number;
   text: string;
   likes: number;
   dislikes: number;
