@@ -12,8 +12,8 @@ export class AuthService {
   private router = inject(Router);
 
   isLoggedIn = signal<boolean>(this.checkInitialLoginState());
-  currentUsername = signal<string | null>(localStorage.getItem(CURRENT_USER_KEY));
-  currentRole = signal<string | null>(localStorage.getItem(CURRENT_ROLE_KEY));
+  currentUsername = signal<string | null>(sessionStorage.getItem(CURRENT_USER_KEY));
+  currentRole = signal<string | null>(sessionStorage.getItem(CURRENT_ROLE_KEY));
 
   private checkInitialLoginState(): boolean {
     return sessionStorage.getItem(CURRENT_USER_KEY) !== null && sessionStorage.getItem(AUTH_TOKEN_KEY) !== null;

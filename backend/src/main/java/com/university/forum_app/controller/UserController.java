@@ -95,6 +95,8 @@ public class UserController {
             return new ResponseEntity<>(unblockedUser, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
 
     @GetMapping("/{username}/score")
     public ResponseEntity<Object> getUserScore(@PathVariable String username) {

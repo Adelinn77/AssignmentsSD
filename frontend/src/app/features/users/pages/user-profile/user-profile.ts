@@ -30,9 +30,12 @@ export class UserProfile implements OnInit {
 
     const targetUsername = routeUsername || this.username;
 
-    if (targetUsername) {
+    if (targetUsername && targetUsername !== 'null') {
       this.fetchData(targetUsername);
       this.fetchUserQuestions(targetUsername);
+    } else {
+      this.errorMessage.set('User profile could not be identified.');
+      this.isLoading.set(false);
     }
   }
 

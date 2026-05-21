@@ -30,81 +30,6 @@
             class="question-images"
             style="margin-top: 20px; display: flex; flex-direction: column; gap: 15px"
           >
-            @if (!isQuestionAuthor()) {
-              <button
-                class="vote-btn like-btn"
-                (click)="likeQuestion()"
-                id="btn-like-question"
-                [style.backgroundColor]="question()!.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'"
-                [style.borderColor]="question()!.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
-                style="padding: 8px 12px; border-radius: 6px; cursor: pointer"
-              >
-                <span class="vote-icon" style="font-size: 20px">👍</span>
-              </button>
-            }
-
-            <div
-              class="score"
-              style="font-weight: bold; font-size: 20px; text-align: center; min-width: 30px"
-            >
-              {{ question()!.likes - question()!.dislikes }}
-            </div>
-
-            @if (!isQuestionAuthor()) {
-              <button
-                class="vote-btn dislike-btn"
-                (click)="dislikeQuestion()"
-                id="btn-dislike-question"
-                [style.backgroundColor]="question()!.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'"
-                [style.borderColor]="question()!.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'"
-                style="padding: 8px 12px; border-radius: 6px; cursor: pointer"
-              >
-                <span class="vote-icon" style="font-size: 20px">👎</span>
-              </button>
-            }
-          </div>
-
-          @if (canManageQuestion()) {
-            <div class="author-actions">
-              <button class="btn-edit" (click)="startEditQuestion()" id="btn-edit-question">
-                Edit
-              </button>
-              <button class="btn-delete" (click)="deleteQuestion()" id="btn-delete-question">
-                Delete
-              </button>
-            </div>
-          }
-        }
-
-        @if (isEditingQuestion()) {
-          <div class="edit-form">
-            <strong>Title</strong>
-            <input
-              class="edit-input"
-              type="text"
-              [ngModel]="editTitle()"
-              (ngModelChange)="editTitle.set($event)"
-              placeholder="Title"
-            />
-
-            <strong>Text</strong>
-            <textarea
-              class="edit-textarea"
-              [ngModel]="editText()"
-              (ngModelChange)="editText.set($event)"
-              placeholder="Text"
-              rows="4"
-            ></textarea>
-
-            <div class="edit-actions">
-              <button class="btn-save" (click)="saveEditQuestion()" id="btn-save-question">
-                Save
-              </button>
-              <button class="btn-cancel" (click)="cancelEditQuestion()" id="btn-cancel-question">
-                Cancel
-              </button>
-            </div>
-          </div>
             @for (imgUrl of question()!.imageUrls; track imgUrl) {
               <img
                 [src]="'http://localhost:8080/uploads/questions/' + imgUrl"
@@ -180,7 +105,7 @@
         }
       </div>
 
-      @if (isQuestionAuthor()) {
+      @if (canManageQuestion()) {
         <div class="author-actions">
           <button class="btn-edit" (click)="startEditQuestion()" id="btn-edit-question">
             Edit
@@ -220,21 +145,16 @@
         </div>
       </div>
     }
-
     <div class="answers-section">
       <div class="answers-header">
         <h2 class="answers-title">
           Answers
           <span class="answers-count">({{ answers().length }})</span>
         </h2>
-
         @if (!showAddAnswerPanel()) {
-          <button (click)="openAddAnswerPanel()" class="add-answer-btn">
-            Add New Response
-          </button>
+          <button (click)="openAddAnswerPanel()" class="add-answer-btn">Add New Response</button>
         }
       </div>
-
       @if (showAddAnswerPanel()) {
         <div class="add-answer-panel" style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 8px;">
           <div class="form-group">
@@ -295,7 +215,6 @@
           </div>
         </div>
       }
-
       @if (answers().length === 0) {
         <div class="no-answers">
           <p>No answers yet. Be the first to answer!</p>
@@ -314,7 +233,6 @@
                 placeholder="Text"
                 rows="4"
               ></textarea>
-
               <div class="edit-actions">
                 <button
                   class="btn-save"
@@ -340,7 +258,7 @@
               [ngStyle]="{
                 'background-color': answer.accepted ? '#f0fff0' : 'transparent',
                 padding: answer.accepted ? '10px' : '0',
-                'border-radius': '8px'
+                'border-radius': '8px',
               }"
             >
               <div class="answer-author-section">
@@ -358,11 +276,10 @@
                     ({{ (answer.authorScore ?? 0) % 1 === 0 ? (answer.authorScore ?? 0) : (answer.authorScore ?? 0 | number:'1.1-1') }} pts)
                   </span>
                   <span class="answer-date">{{
-                    answer.dateTime | date: 'dd MMM yyyy, HH:mm'
-                  }}</span>
+                      answer.dateTime | date: 'dd MMM yyyy, HH:mm'
+                    }}</span>
                 </div>
               </div>
-
               <div style="display: flex; align-items: center; gap: 15px">
                 @if (answer.accepted) {
                   <span
@@ -379,14 +296,11 @@
                     ✅ Accepted
                   </span>
                 }
-
                 <span class="answer-number">#{{ i + 1 }}</span>
               </div>
             </div>
-
             <div class="answer-body">
               <p class="answer-text">{{ answer.text }}</p>
-
               @if (answer.imageUrls && answer.imageUrls.length > 0) {
                 <div
                   class="answer-images"
@@ -415,7 +329,6 @@
                 </div>
               }
             </div>
-
             <div
               class="vote-actions answer-vote-actions"
               style="
@@ -431,34 +344,35 @@
                   class="vote-btn like-btn"
                   (click)="likeAnswer(answer.answerId)"
                   [id]="'btn-like-answer-' + answer.answerId"
-                  [style.backgroundColor]="answer.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'"
+                  [style.backgroundColor]="
+                    answer.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'
+                  "
                   [style.borderColor]="answer.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
                   style="padding: 6px 10px; border-radius: 6px; cursor: pointer"
                 >
                   <span class="vote-icon" style="font-size: 18px">👍</span>
                 </button>
               }
-
               <div
                 class="score"
                 style="font-weight: bold; font-size: 18px; text-align: center; min-width: 20px"
               >
                 {{ answer.likes - answer.dislikes }}
               </div>
-
               @if (!isAnswerAuthor(answer)) {
                 <button
                   class="vote-btn dislike-btn"
                   (click)="dislikeAnswer(answer.answerId)"
                   [id]="'btn-dislike-answer-' + answer.answerId"
-                  [style.backgroundColor]="answer.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'"
+                  [style.backgroundColor]="
+                    answer.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'
+                  "
                   [style.borderColor]="answer.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'"
                   style="padding: 6px 10px; border-radius: 6px; cursor: pointer"
                 >
                   <span class="vote-icon" style="font-size: 18px">👎</span>
                 </button>
               }
-
               @if (isQuestionAuthor() && question()?.status !== 'RESOLVED') {
                 <button
                   (click)="acceptAnswer(answer)"
@@ -480,7 +394,6 @@
                 </button>
               }
             </div>
-
             @if (canManageAnswer(answer)) {
               <div class="author-actions">
                 <button
@@ -501,6 +414,7 @@
             }
           </div>
         }
+        <!-- Normal view for this answer -->
       }
     </div>
   </div>
@@ -537,8 +451,8 @@
     "
     (click)="closeFullscreen()"
     (keydown.enter)="closeFullscreen()"
-    tabindex="0"
-  >
+    tabindex="0">
+    >
     <button
       type="button"
       title="Close"
@@ -562,7 +476,6 @@
     >
       &times;
     </button>
-
     <img
       [src]="fullscreenImageUrl()"
       alt="Fullscreen Image"
@@ -575,7 +488,7 @@
       "
       (click)="$event.stopPropagation()"
       (keydown.enter)="$event.stopPropagation()"
-      tabindex="0"
+      tabindex="0">
     />
   </div>
 }
