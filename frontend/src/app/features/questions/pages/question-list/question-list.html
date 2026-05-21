@@ -267,50 +267,6 @@
               >
                 {{ question.title }}
               </a>
-              @if (question.imageUrls && question.imageUrls.length > 0) {
-                <div
-                  class="question-images-preview"
-                  style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 10px"
-                >
-                  {{ tag }}
-                </span>
-            </div>
-          </td>
-
-          <td class="author-info">
-            <a
-              [routerLink]="['/users', question.authorName]"
-              class="author-link"
-            >
-              {{ question.authorName }}
-            </a>
-          </td>
-
-          <td class="text-center">
-            <span
-              [style.color]="(question.authorScore ?? 0) > 0 ? '#28a745' : (question.authorScore ?? 0) < 0 ? '#dc3545' : '#6c757d'"
-              style="font-weight: bold; font-size: 14px;"
-              title="Author reputation score"
-            >
-              {{ (question.authorScore ?? 0) % 1 === 0 ? (question.authorScore ?? 0) : (question.authorScore ?? 0 | number:'1.1-1') }}
-            </span>
-          </td>
-
-          <td class="text-center">
-            <div class="vote-section" style="display: flex; align-items: center; justify-content: center; gap: 10px;">
-              <button
-                *ngIf="!isAuthor(question)"
-                (click)="likeQuestion(question)"
-                style="background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-size: 16px;"
-                [style.backgroundColor]="question.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'"
-                [style.borderColor]="question.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
-              >
-                👍
-              </button>
-
-              <div class="score" style="font-weight: bold; font-size: 16px; min-width: 24px; text-align: center;">
-                {{ question.likes - question.dislikes }}
-              </div>
               @if (question.tags && question.tags.length > 0) {
                 <div
                   class="question-tags"
@@ -318,12 +274,7 @@
                 >
                   @for (tag of question.tags; track tag) {
                     <span
-                      style="
-                        padding: 3px 8px;
-                        background: #eef2ff;
-                        border-radius: 12px;
-                        font-size: 12px;
-                      "
+                      style="padding: 3px 8px; background: #eef2ff; border-radius: 12px; font-size: 12px;"
                     >
                       {{ tag }}
                     </span>
@@ -331,12 +282,23 @@
                 </div>
               }
             </td>
+
             <td class="author-info">
               <a [routerLink]="['/users', question.authorName]" class="author-link">
                 {{ question.authorName }}
               </a>
             </td>
-            <td class="text-center">-</td>
+
+            <td class="text-center">
+              <span
+                [style.color]="(question.authorScore ?? 0) > 0 ? '#28a745' : (question.authorScore ?? 0) < 0 ? '#dc3545' : '#6c757d'"
+                style="font-weight: bold; font-size: 14px;"
+                title="Author reputation score"
+              >
+                {{ (question.authorScore ?? 0) % 1 === 0 ? (question.authorScore ?? 0) : (question.authorScore ?? 0 | number:'1.1-1') }}
+              </span>
+            </td>
+
             <td class="text-center">
               <div
                 class="vote-section"
@@ -345,17 +307,8 @@
                 @if (!isAuthor(question)) {
                   <button
                     (click)="likeQuestion(question)"
-                    style="
-                      background: none;
-                      border: 1px solid #ccc;
-                      border-radius: 4px;
-                      cursor: pointer;
-                      padding: 4px 8px;
-                      font-size: 16px;
-                    "
-                    [style.backgroundColor]="
-                      question.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'
-                    "
+                    style="background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-size: 16px;"
+                    [style.backgroundColor]="question.currentUserVote === 'LIKE' ? '#e6f2ff' : 'transparent'"
                     [style.borderColor]="question.currentUserVote === 'LIKE' ? '#0066cc' : '#ccc'"
                   >
                     👍
@@ -370,26 +323,16 @@
                 @if (!isAuthor(question)) {
                   <button
                     (click)="dislikeQuestion(question)"
-                    style="
-                      background: none;
-                      border: 1px solid #ccc;
-                      border-radius: 4px;
-                      cursor: pointer;
-                      padding: 4px 8px;
-                      font-size: 16px;
-                    "
-                    [style.backgroundColor]="
-                      question.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'
-                    "
-                    [style.borderColor]="
-                      question.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'
-                    "
+                    style="background: none; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 4px 8px; font-size: 16px;"
+                    [style.backgroundColor]="question.currentUserVote === 'DISLIKE' ? '#ffe6e6' : 'transparent'"
+                    [style.borderColor]="question.currentUserVote === 'DISLIKE' ? '#cc0000' : '#ccc'"
                   >
                     👎
                   </button>
                 }
               </div>
             </td>
+
             <td class="text-center">
               @if (isAuthor(question)) {
                 <button
@@ -406,13 +349,15 @@
                 >
                   Delete
                 </button>
+              } @else {
+                -
               }
             </td>
           </tr>
         }
-      }
 
-      @if (filteredQuestions().length === 0) {
+
+      }@if (filteredQuestions().length === 0) {
         <tr>
           <td colspan="5" class="text-center" style="padding: 20px">No questions found.</td>
         </tr>

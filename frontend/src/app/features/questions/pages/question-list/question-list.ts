@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 
 import { RouterLink } from '@angular/router';
+import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { QuestionService } from '../../services/question.service';
 import { Question } from '../../models/question.model';
@@ -10,7 +11,7 @@ import { Status } from '../../models/question.model';
 @Component({
   selector: 'app-question-list',
   standalone: true,
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, CommonModule],
   templateUrl: './question-list.html',
   styleUrl: './question-list.scss',
 })
