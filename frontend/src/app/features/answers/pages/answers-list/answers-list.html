@@ -220,7 +220,7 @@
           <p>No answers yet. Be the first to answer!</p>
         </div>
       }
-      @for (answer of answers(); track answer; let i = $index) {
+      @for (answer of sortedAnswers(); track answer; let i = $index) {
         <!-- Edit mode for this answer -->
         @if (editingAnswer()?.answerId === answer.answerId) {
           <div class="answer-card">
