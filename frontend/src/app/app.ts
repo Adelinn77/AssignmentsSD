@@ -1,5 +1,5 @@
 import { Component, signal } from '@angular/core';
-import {NavigationCancel, RouterOutlet} from '@angular/router';
+import {RouterOutlet} from '@angular/router';
 import { Navbar } from './shared/components/navbar/navbar';
 
 @Component({

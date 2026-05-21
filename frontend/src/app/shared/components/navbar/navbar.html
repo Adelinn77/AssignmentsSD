@@ -1,15 +1,25 @@
-<nav style="padding: 1rem; background-color: #f8f9fa; border-bottom: 1px solid #ddd; display: flex; justify-content: space-between;">
+<nav
+  style="
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #ddd;
+    display: flex;
+    justify-content: space-between;
+  "
+>
+  @if (authService.isLoggedIn()) {
+    <div style="display: flex; gap: 15px">
+      <a routerLink="/questions" routerLinkActive="active">Home (Questions)</a>
+      <a routerLink="/users" routerLinkActive="active">Users</a>
+      <a [routerLink]="['/users', authService.currentUsername()]" routerLinkActive="active"
+        >Profile</a
+      >
+    </div>
+  }
 
-  <div style="display: flex; gap: 15px;" *ngIf="authService.isLoggedIn()">
-    <a routerLink="/questions" routerLinkActive="active">Home (Questions)</a>
-    <a routerLink="/users" routerLinkActive="active">Users</a>
-    <a [routerLink]="['/users', authService.currentUsername()]" routerLinkActive="active">Profile</a>
-  </div>
-
-  <div style="display: flex; gap: 15px; margin-left: auto;">
-    <ng-container *ngIf="authService.isLoggedIn()">
+  <div style="display: flex; gap: 15px; margin-left: auto">
+    @if (authService.isLoggedIn()) {
       <button (click)="authService.logout()">Logout</button>
-    </ng-container>
-
+    }
   </div>
 </nav>
