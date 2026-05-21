@@ -358,23 +358,15 @@
             </td>
 
             <td class="text-center">
-              @if (isAuthor(question)) {
-                <button
-                  class="btn-edit"
-                  (click)="startEdit(question)"
-                  [id]="'btn-edit-' + question.questionId"
-                >
-                  Edit
-                </button>
-                <button
-                  class="btn-delete"
-                  (click)="deleteQuestion(question)"
-                  [id]="'btn-delete-' + question.questionId"
-                >
-                  Delete
-                </button>
-              } @else {
-                -
+              @if (canManageQuestion(question)) {
+                <div class="author-actions">
+                  <button class="btn-edit" (click)="startEdit(question)" id="btn-edit-question">
+                    Edit
+                  </button>
+                  <button class="btn-delete" (click)="deleteQuestion(question)" id="btn-delete-question">
+                    Delete
+                  </button>
+                </div>
               }
             </td>
           </tr>

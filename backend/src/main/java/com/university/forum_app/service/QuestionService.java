@@ -3,6 +3,7 @@ package com.university.forum_app.service;
 import com.university.forum_app.dto.QuestionDTO;
 import com.university.forum_app.entity.Question;
 import com.university.forum_app.entity.QuestionImage;
+import com.university.forum_app.entity.Role;
 import com.university.forum_app.entity.Tag;
 import com.university.forum_app.entity.User;
 import com.university.forum_app.repository.QuestionRepository;
@@ -23,6 +24,9 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import com.university.forum_app.entity.Answer;
+import com.university.forum_app.repository.AnswerRepository;
+import com.university.forum_app.repository.AnswerVoteRepository;
 
 @Service
 public class QuestionService {
@@ -38,6 +42,11 @@ public class QuestionService {
 
     @Autowired
     private QuestionVoteRepository questionVoteRepository;
+    @Autowired
+    private AnswerRepository answerRepository;
+
+    @Autowired
+    private AnswerVoteRepository answerVoteRepository;
 
     @Autowired
     private UserScoreService userScoreService;
@@ -161,10 +170,17 @@ public class QuestionService {
 
     @Transactional
     public QuestionDTO updateQuestion(String currentTitle, QuestionDTO updatedQuestion) {
+        return updateQuestion(currentTitle, updatedQuestion, null);
+    }
+
+    @Transactional
+    public QuestionDTO updateQuestion(String currentTitle, QuestionDTO updatedQuestion, String username) {
         Question question = questionRepository.findByTitle(currentTitle);
         if (question == null) {
             throw new IllegalArgumentException("No question exists with this title: '" + currentTitle + "'.");
         }
+
+        requireOwnerOrAdmin(question, username);
 
         if(!currentTitle.equals(updatedQuestion.getTitle()) && questionRepository.existsByTitle(updatedQuestion.getTitle())) {
             throw new IllegalArgumentException("The new title '" + updatedQuestion.getTitle() + "' is already used by another question.");
@@ -183,11 +199,31 @@ public class QuestionService {
 
     @Transactional
     public void deleteQuestionByTitle(String title) {
-        if(questionRepository.existsByTitle(title)){
-            questionRepository.deleteByTitle(title);
-        } else {
+        deleteQuestionByTitle(title, null);
+    }
+
+    @Transactional
+    public void deleteQuestionByTitle(String title, String username) {
+        Question question = questionRepository.findByTitle(title);
+        if(question == null){
             throw new IllegalArgumentException("No question exists with this title: '" + title + "'.");
         }
+
+        requireOwnerOrAdmin(question, username);
+
+        List<Answer> answers = answerRepository.findByQuestionId(question.getId());
+
+        if (!answers.isEmpty()) {
+            answerVoteRepository.deleteByAnswerIn(answers);
+        }
+
+        questionVoteRepository.deleteByQuestion(question);
+
+        if (question.getTags() != null) {
+            question.getTags().clear();
+        }
+
+        questionRepository.delete(question);
     }
 
     @Transactional(readOnly = true)
@@ -280,6 +316,24 @@ public class QuestionService {
 
         List<Question> questions = questionRepository.findByAuthorUsername(username);
         return questions.stream().map(this::mapEntityToDTO).toList();
+    }
+
+    private void requireOwnerOrAdmin(Question question, String username) {
+        if (username == null) {
+            return;
+        }
+
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        boolean owner = question.getAuthor() != null && question.getAuthor().getUsername().equals(username);
+        boolean admin = user.getRole() == Role.ADMIN;
+
+        if (!owner && !admin) {
+            throw new IllegalArgumentException("You are not allowed to change this question.");
+        }
     }
 
     private String saveImageToDisk(MultipartFile file) {

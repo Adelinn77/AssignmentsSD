@@ -36,6 +36,8 @@ public class UserService {
                 .phone(user.getPhone())
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
+                .role(user.getRole())
+                .accessRestricted(user.isAccessRestricted())
                 .score(score)
                 .build();
     }
@@ -69,7 +71,7 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
 
         user.setRole(Role.USER);
-
+        user.setAccessRestricted(false);
         userRepository.save(user);
 
         return mapEntityToDTO(user);
@@ -133,5 +135,50 @@ public class UserService {
         } else {
             throw new IllegalArgumentException("User with id " + id + " does not exist.");
         }
+    }
+    @Transactional
+    public UserDTO blockUser(String username, String adminUsername) {
+        User admin = requireAdmin(adminUsername);
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User with username '" + username + "' does not exist.");
+        }
+        if (user.getUsername().equals(admin.getUsername())) {
+            throw new IllegalArgumentException("An admin cannot block their own account.");
+        }
+
+        user.setAccessRestricted(true);
+        userRepository.save(user);
+
+        return mapEntityToDTO(user);
+    }
+
+    @Transactional
+    public UserDTO unblockUser(String username, String adminUsername) {
+        requireAdmin(adminUsername);
+
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User with username '" + username + "' does not exist.");
+        }
+
+        user.setAccessRestricted(false);
+        userRepository.save(user);
+
+        return mapEntityToDTO(user);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean isAdmin(String username) {
+        User user = userRepository.findByUsername(username);
+        return user != null && user.getRole() == Role.ADMIN;
+    }
+
+    private User requireAdmin(String username) {
+        User user = userRepository.findByUsername(username);
+        if (user == null || user.getRole() != Role.ADMIN) {
+            throw new IllegalArgumentException("Admin privileges are required.");
+        }
+        return user;
     }
 }

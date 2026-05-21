@@ -2,7 +2,7 @@ package com.university.forum_app.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.Customizer;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -32,14 +32,36 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(org.springframework.http.HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/auth/register", "/api/auth/login", "/error", "/uploads/**").permitAll()
+                        .requestMatchers("/api/users/*/block", "/api/users/*/unblock").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .httpBasic(basic -> basic.authenticationEntryPoint(
-                        (request, response, authException) ->
-                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")
+                        (request, response, authException) -> {
+                            if (isDisabledException(authException)) {
+                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN, "Your account has been blocked.");
+                            } else {
+                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized");
+                            }
+                        }
+                ))
+                .exceptionHandling(exception -> exception.accessDeniedHandler(
+                        (request, response, accessDeniedException) ->
+                                response.sendError(jakarta.servlet.http.HttpServletResponse.SC_FORBIDDEN, "Access denied")
                 ));
 
         return http.build();
+    }
+
+    private boolean isDisabledException(Throwable throwable) {
+        while (throwable != null) {
+            if (throwable instanceof DisabledException) {
+                return true;
+            }
+
+            throwable = throwable.getCause();
+        }
+
+        return false;
     }
 
     @Bean

@@ -13,8 +13,9 @@ import org.springframework.context.annotation.Bean;
 
 import java.util.ArrayList;
 import java.util.List;
-
+import org.springframework.scheduling.annotation.EnableAsync;
 @SpringBootApplication
+@EnableAsync
 public class Application {
 
     public static UserService userService;

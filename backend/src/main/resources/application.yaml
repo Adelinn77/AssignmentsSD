@@ -11,3 +11,13 @@ spring:
       ddl-auto: update
     show-sql: true
     open-in-view: false
+sendgrid:
+  enabled: ${SENDGRID_ENABLED:false}
+  api-key: ${SENDGRID_API_KEY:}
+  from-email: ${SENDGRID_FROM_EMAIL:}
+
+twilio:
+  enabled: ${TWILIO_ENABLED:false}
+  account-sid: ${TWILIO_ACCOUNT_SID:}
+  auth-token: ${TWILIO_AUTH_TOKEN:}
+  from-number: ${TWILIO_FROM_NUMBER:}

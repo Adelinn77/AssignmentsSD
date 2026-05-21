@@ -4,6 +4,7 @@ import com.university.forum_app.dto.AnswerDTO;
 import com.university.forum_app.entity.Answer;
 import com.university.forum_app.entity.AnswerImage;
 import com.university.forum_app.entity.Question;
+import com.university.forum_app.entity.Role;
 import com.university.forum_app.entity.Status;
 import com.university.forum_app.entity.User;
 import com.university.forum_app.repository.AnswerRepository;
@@ -164,9 +165,16 @@ public class AnswerService {
 
     @Transactional
     public AnswerDTO updateAnswer(AnswerDTO updatedAnswer) {
+        return updateAnswer(updatedAnswer, null);
+    }
+
+    @Transactional
+    public AnswerDTO updateAnswer(AnswerDTO updatedAnswer, String username) {
         Answer answer = answerRepo.findById(updatedAnswer.getAnswerId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "No answer exists with id: '" + updatedAnswer.getAnswerId() + "'."));
+
+        requireOwnerOrAdmin(answer, username);
 
         Answer mappedData = mapDTOToEntity(updatedAnswer);
         answer.setText(mappedData.getText());
@@ -176,10 +184,17 @@ public class AnswerService {
 
     @Transactional
     public void deleteAnswerById(Long id) {
+        deleteAnswerById(id, null);
+    }
+
+    @Transactional
+    public void deleteAnswerById(Long id, String username) {
         Answer answer = answerRepo.findAnswerById(id);
         if(answer == null) {
             throw new IllegalArgumentException("No answer exists with id: '" + id + "'.");
         }
+
+        requireOwnerOrAdmin(answer, username);
 
         Question question = answer.getQuestion();
         boolean wasAccepted = answer.isAccepted();
@@ -326,9 +341,27 @@ public class AnswerService {
         return mapEntityToDTO(answer, username);
     }
 
+    private void requireOwnerOrAdmin(Answer answer, String username) {
+        if (username == null) {
+            return;
+        }
+
+        User user = userRepository.findByUsername(username);
+        if (user == null) {
+            throw new IllegalArgumentException("User not found.");
+        }
+
+        boolean owner = answer.getAuthor() != null && answer.getAuthor().getUsername().equals(username);
+        boolean admin = user.getRole() == Role.ADMIN;
+
+        if (!owner && !admin) {
+            throw new IllegalArgumentException("You are not allowed to change this answer.");
+        }
+    }
+
     private void updateQuestionStatusIfFirstAnswer(Question question) {
         if (question != null) {
-            entityManager.flush(); // Ensure the answer is persisted before counting
+            entityManager.flush();
 
             Question managedQuestion = questionRepository.findById(question.getId())
                     .orElseThrow(() -> new IllegalArgumentException("Question not found"));
@@ -338,7 +371,7 @@ public class AnswerService {
                 if (answerCount == 1) {
                     managedQuestion.setStatus(Status.IN_PROGRESS);
                     questionRepository.save(managedQuestion);
-                    entityManager.flush(); // Ensure the status change is persisted
+                    entityManager.flush();
                 }
             }
         }

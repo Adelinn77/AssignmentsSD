@@ -10,10 +10,14 @@
   @if (authService.isLoggedIn()) {
     <div style="display: flex; gap: 15px">
       <a routerLink="/questions" routerLinkActive="active">Home (Questions)</a>
-      <a routerLink="/users" routerLinkActive="active">Users</a>
-      <a [routerLink]="['/users', authService.currentUsername()]" routerLinkActive="active"
-        >Profile</a
-      >
+
+      @if (authService.isAdmin()) {
+        <a routerLink="/users" routerLinkActive="active">Users</a>
+      }
+
+      <a [routerLink]="['/users', authService.currentUsername()]" routerLinkActive="active">
+        Profile
+      </a>
     </div>
   }
 
