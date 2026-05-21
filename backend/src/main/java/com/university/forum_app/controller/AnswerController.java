@@ -5,6 +5,7 @@ import com.university.forum_app.service.AnswerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,7 +52,7 @@ public class AnswerController {
             AnswerDTO answer = answerService.findAnswerById(id);
             return new ResponseEntity<>(answer, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 404 e mai potrivit aici
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
         }
     }
 
@@ -67,12 +68,11 @@ public class AnswerController {
         return new ResponseEntity<>(answers, HttpStatus.OK);
     }
 
-
     @PutMapping("/{id}")
-    public ResponseEntity<Object> updateAnswer(@PathVariable Long id, @RequestBody AnswerDTO answerDTO) {
+    public ResponseEntity<Object> updateAnswer(@PathVariable Long id, @RequestBody AnswerDTO answerDTO, Authentication authentication) {
         try {
             answerDTO.setAnswerId(id);
-            AnswerDTO updatedAnswer = answerService.updateAnswer(answerDTO);
+            AnswerDTO updatedAnswer = answerService.updateAnswer(answerDTO, authentication.getName());
             return new ResponseEntity<>(updatedAnswer, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -80,9 +80,9 @@ public class AnswerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAnswer(@PathVariable Long id) {
+    public ResponseEntity<String> deleteAnswer(@PathVariable Long id, Authentication authentication) {
         try {
-            answerService.deleteAnswerById(id);
+            answerService.deleteAnswerById(id, authentication.getName());
             return new ResponseEntity<>("Answer with id " + id + " was deleted successfully.", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);

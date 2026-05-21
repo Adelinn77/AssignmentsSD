@@ -41,10 +41,11 @@ public class User {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role")
-    private Role role;
+    @Builder.Default
+    private Role role=Role.USER;
 
     @Column(name = "access_restricted")
-    private boolean accessRestricted;
+    private boolean accessRestricted=false;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions = new ArrayList<>();

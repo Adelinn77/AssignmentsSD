@@ -41,11 +41,12 @@ export class Login {
     });
 
     this.http
-      .get(`http://localhost:8080/api/users/${name}`, { headers, responseType: 'json' })
+      .get<any>(`http://localhost:8080/api/auth/login`, { headers })
       .subscribe({
-        next: () => {
+        next: (user) => {
           this.authService.setAuthToken(credentials);
           this.authService.setCurrentUsername(name);
+          this.authService.setCurrentRole(user?.role);
 
           this.isLoading.set(false);
           this.router.navigate(['/questions']);
@@ -54,10 +55,31 @@ export class Login {
           this.isLoading.set(false);
           if (err.status === 401) {
             this.errorMsg.set('Username or password is incorrect. Please try again.');
+          } else if (err.status === 403) {
+            this.errorMsg.set('Your account has been blocked.');
           } else {
             this.errorMsg.set('Error connecting to the server. Please try again later.');
           }
         },
       });
+  }
+  private extractErrorMessage(err: any, fallback: string): string {
+    if (!err || !err.error) {
+      return fallback;
+    }
+
+    if (typeof err.error === 'string') {
+      return err.error;
+    }
+
+    if (err.error.message) {
+      return err.error.message;
+    }
+
+    if (err.error.error) {
+      return err.error.error;
+    }
+
+    return fallback;
   }
 }

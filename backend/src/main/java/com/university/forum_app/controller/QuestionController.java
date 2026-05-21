@@ -5,6 +5,7 @@ import com.university.forum_app.service.QuestionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -68,9 +69,10 @@ public class QuestionController {
     @PutMapping("/title/{currentTitle}")
     public ResponseEntity<Object> updateQuestion(
             @PathVariable String currentTitle,
-            @RequestBody QuestionDTO questionDTO) {
+            @RequestBody QuestionDTO questionDTO,
+            Authentication authentication) {
         try {
-            QuestionDTO updatedQuestion = questionService.updateQuestion(currentTitle, questionDTO);
+            QuestionDTO updatedQuestion = questionService.updateQuestion(currentTitle, questionDTO, authentication.getName());
             return new ResponseEntity<>(updatedQuestion, HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
@@ -78,9 +80,9 @@ public class QuestionController {
     }
 
     @DeleteMapping("/title/{title}")
-    public ResponseEntity<String> deleteQuestionByTitle(@PathVariable String title) {
+    public ResponseEntity<String> deleteQuestionByTitle(@PathVariable String title, Authentication authentication) {
         try {
-            questionService.deleteQuestionByTitle(title);
+            questionService.deleteQuestionByTitle(title, authentication.getName());
             return new ResponseEntity<>("Question with title '" + title + "' was deleted successfully.", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);

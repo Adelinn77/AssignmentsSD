@@ -1,11 +1,11 @@
 package com.university.forum_app.service;
 
+import com.university.forum_app.entity.Role;
 import com.university.forum_app.entity.User;
 import com.university.forum_app.repository.UserRepository;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
@@ -23,13 +23,19 @@ public class CustomUserDetailsService implements UserDetailsService {
     public org.springframework.security.core.userdetails.UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username);
         if (user == null) {
-                throw  new UsernameNotFoundException("User not found: " + username);
+            throw  new UsernameNotFoundException("User not found: " + username);
         }
+
+        Role role = user.getRole() != null ? user.getRole() : Role.USER;
 
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                !user.isAccessRestricted(),
+                true,
+                true,
+                true,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()))
         );
     }
 }

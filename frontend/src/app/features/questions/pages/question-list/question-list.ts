@@ -1,5 +1,4 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { QuestionService } from '../../services/question.service';
@@ -16,7 +15,7 @@ import { Status } from '../../models/question.model';
 })
 export class QuestionList implements OnInit {
   private questionService = inject(QuestionService);
-  private authService = inject(AuthService);
+  authService = inject(AuthService);
 
   questions = signal<Question[]>([]);
   isLoading = signal<boolean>(false);
@@ -28,13 +27,11 @@ export class QuestionList implements OnInit {
   newQuestionTags = signal<string>('');
   selectedImages = signal<{ file: File; url: string }[]>([]);
 
-  // Filters
   searchTitle = signal<string>('');
   selectedTag = signal<string>('');
   selectedUser = signal<string>('');
   onlyMyQuestions = signal<boolean>(false);
 
-  // Edit state
   editingQuestion = signal<Question | null>(null);
   editTitle = signal<string>('');
   editText = signal<string>('');
@@ -84,11 +81,8 @@ export class QuestionList implements OnInit {
       const tags = question.tags ?? [];
 
       const matchesTitle = titleFilter === '' || title.includes(titleFilter);
-
       const matchesTag = tagFilter === '' || tags.some((tag) => tag.toLowerCase() === tagFilter);
-
       const matchesUser = userFilter === '' || author === userFilter;
-
       const matchesOnlyMyQuestions = !onlyMine || (currentUser !== '' && author === currentUser);
 
       return matchesTitle && matchesTag && matchesUser && matchesOnlyMyQuestions;
@@ -140,6 +134,10 @@ export class QuestionList implements OnInit {
 
   isAuthor(question: Question): boolean {
     return this.currentUsername !== null && this.currentUsername === question.authorName;
+  }
+
+  canManageQuestion(question: Question): boolean {
+    return this.isAuthor(question) || this.authService.isAdmin();
   }
 
   startEdit(question: Question): void {
@@ -201,6 +199,7 @@ export class QuestionList implements OnInit {
       alert('You must be logged in to vote.');
       return;
     }
+
     this.questionService.likeQuestion(question.questionId, this.currentUsername).subscribe({
       next: (updatedQuestion) => {
         this.questions.update((list) =>
@@ -216,6 +215,7 @@ export class QuestionList implements OnInit {
       alert('You must be logged in to vote.');
       return;
     }
+
     this.questionService.dislikeQuestion(question.questionId, this.currentUsername).subscribe({
       next: (updatedQuestion) => {
         this.questions.update((list) =>

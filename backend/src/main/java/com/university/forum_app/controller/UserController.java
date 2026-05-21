@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/api/users")
@@ -72,6 +73,25 @@ public class UserController {
             return new ResponseEntity<>("User with username '" + username + "' was deleted successfully.", HttpStatus.OK);
         } catch (IllegalArgumentException e) {
             return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND); // 404 Not Found
+        }
+    }
+    @PutMapping("/{username}/block")
+    public ResponseEntity<Object> blockUser(@PathVariable String username, Authentication authentication) {
+        try {
+            UserDTO blockedUser = userService.blockUser(username, authentication.getName());
+            return new ResponseEntity<>(blockedUser, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @PutMapping("/{username}/unblock")
+    public ResponseEntity<Object> unblockUser(@PathVariable String username, Authentication authentication) {
+        try {
+            UserDTO unblockedUser = userService.unblockUser(username, authentication.getName());
+            return new ResponseEntity<>(unblockedUser, HttpStatus.OK);
+        } catch (IllegalArgumentException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -4,4 +4,6 @@ export interface User {
   phone: string;
   firstName: string;
   lastName: string;
+  role?: 'USER' | 'ADMIN';
+  accessRestricted?: boolean;
 }

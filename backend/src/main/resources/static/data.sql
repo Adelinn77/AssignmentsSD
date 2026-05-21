@@ -41,6 +41,7 @@ INSERT INTO tags (tag_id, label) VALUES
 --         1 = În curs (Are răspunsuri, niciunul acceptat)
 --         2 = Rezolvată (Are un răspuns acceptat)
 -- ==========================================
+
 INSERT INTO questions (question_id, user_id, title, text, likes, dislikes, date_and_time, status) VALUES
 -- Q1: Alice. Are un răspuns acceptat -> Status 2
 (1, 2, 'How to handle CORS in Spring Boot?', 'I am getting a blocked by CORS policy error when calling my API from Angular.', 2, 0, '2026-05-15 10:00:00', 'RESOLVED'),
