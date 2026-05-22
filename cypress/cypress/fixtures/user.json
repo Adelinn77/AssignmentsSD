@@ -1,5 +1,6 @@
 {
   "username": "cypress_user",
+  "password": "TestPassword123!",
   "email": "cypress_user@test.com",
   "phone": "0712345678",
   "firstName": "Cypress",

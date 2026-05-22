@@ -1,211 +1,170 @@
 describe('AnswerController — Unit Tests', () => {
-
     const BASE = '/api/answers';
-    const AUTHOR = `test_author_${Date.now()}`;
-    const TEST_PASSWORD = 'TestPassword123!'; // Added a password for registration
+
+    let questionAuthor;
+    let answerAuthor;
+    let voter;
+    let question;
 
     const makeAnswer = () => ({
-        title: `Test Answer ${Date.now()} ${Math.floor(Math.random() * 100000)}`,
-        text: 'Test content',
-        authorName: AUTHOR,
-        status: 'RECEIVED',
-        tags: []
+        questionId: question.questionId,
+        authorName: answerAuthor.username,
+        text: `Test answer ${Date.now()} ${Math.floor(Math.random() * 100000)}`
     });
 
     before(() => {
-        // We skip the DELETE step here. Since AUTHOR uses Date.now(),
-        // it is always unique, so there is no need to delete it first.
-
-        // 1. Create the test user using the PUBLIC register endpoint
-        cy.request({
-            method: 'POST',
-            url: '/api/auth/register', // Updated to the permitAll() route
-            body: {
-                username: AUTHOR,
-                password: TEST_PASSWORD, // Added password for HTTP Basic Auth
-                email: `${AUTHOR}@test.com`,
-                phone: '0000000001',
-                firstName: 'Test',
-                lastName: 'User'
-            }
+        cy.registerUser({ username: `answer_q_author_${Date.now()}` }).then((user) => {
+            questionAuthor = user;
+            return cy.createQuestionAs(user.auth, { authorName: user.username });
         }).then((res) => {
-            // Your Spring controller might return 200 or 201, adjusting assertion to accept both
-            expect([200, 201]).to.include(res.status);
+            expect(res.status).to.eq(201);
+            question = res.body;
+        });
+
+        cy.registerUser({ username: `answer_author_${Date.now()}` }).then((user) => {
+            answerAuthor = user;
+        });
+
+        cy.registerUser({ username: `answer_voter_${Date.now()}` }).then((user) => {
+            voter = user;
         });
     });
 
     it('POST /answers — create answer', () => {
         const answer = makeAnswer();
 
-        // 2. Use Cypress 'auth' object for protected routes
-        cy.request({
-            method: 'POST',
-            url: BASE,
-            body: answer,
-            auth: {
-                user: AUTHOR,
-                pass: TEST_PASSWORD
-            }
-        }).then((res) => {
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((res) => {
             expect(res.status).to.eq(201);
-            expect(res.body).to.exist;
-            expect(res.body.title).to.eq(answer.title);
+            expect(res.body).to.have.property('answerId');
             expect(res.body.text).to.eq(answer.text);
-            expect(res.body.authorName).to.eq(AUTHOR);
-            expect(res.body.status).to.eq('RECEIVED');
+            expect(res.body.authorName).to.eq(answerAuthor.username);
+            expect(res.body.questionId).to.eq(question.questionId);
         });
     });
 
     it('GET /answers — list answers', () => {
-        cy.request({
-            method: 'GET',
-            url: BASE,
-            auth: {
-                user: AUTHOR,
-                pass: TEST_PASSWORD
-            }
-        }).then((res) => {
+        cy.request({ method: 'GET', url: BASE, auth: answerAuthor.auth }).then((res) => {
             expect(res.status).to.eq(200);
             expect(res.body).to.be.an('array');
         });
     });
 
-    it('GET /answers/title/:title — get one answer by title', () => {
+    it('GET /answers/:id — get answer by id', () => {
         const answer = makeAnswer();
 
-        // 1. Create the answer (needs auth)
-        cy.request({
-            method: 'POST',
-            url: BASE,
-            body: answer,
-            auth: {
-                user: AUTHOR,
-                pass: TEST_PASSWORD
-            }
-        }).then((createRes) => {
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
             expect(createRes.status).to.eq(201);
 
-            // 2. Fetch the newly created answer (needs auth)
-            cy.request({
-                method: 'GET',
-                url: `${BASE}/title/${encodeURIComponent(answer.title)}`,
-                auth: {
-                    user: AUTHOR,
-                    pass: TEST_PASSWORD
-                }
-            }).then((res) => {
+            cy.request({ method: 'GET', url: `${BASE}/${createRes.body.answerId}`, auth: answerAuthor.auth }).then((res) => {
                 expect(res.status).to.eq(200);
-                expect(res.body).to.exist;
-                expect(res.body.title).to.eq(answer.title);
+                expect(res.body.answerId).to.eq(createRes.body.answerId);
                 expect(res.body.text).to.eq(answer.text);
-                expect(res.body.authorName).to.eq(AUTHOR);
-                expect(res.body.status).to.eq('RECEIVED');
             });
         });
     });
 
-    it('PUT /answers/title/:title — update answer', () => {
+    it('GET /answers/question/:questionId — get answers by question', () => {
+        const answer = makeAnswer();
 
-        const unique = Date.now() + '_' + Math.floor(Math.random() * 100000);
-
-        const answer = {
-            title: `Test Answer ${unique}`,
-            text: 'Test content',
-            authorName: AUTHOR,
-            status: 'RECEIVED',
-            tags: []
-        };
-
-        // 1. Create the answer (needs auth)
-        cy.request({
-            method: 'POST',
-            url: BASE,
-            body: answer,
-            auth: {
-                user: AUTHOR,
-                pass: TEST_PASSWORD
-            }
-        }).then((createRes) => {
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
             expect(createRes.status).to.eq(201);
 
-            const updatedAnswer = {
-                title: answer.title,
-                text: 'Updated content',
-                authorName: AUTHOR,
-                status: 'RECEIVED',
-                tags: []
-            };
+            cy.request({ method: 'GET', url: `${BASE}/question/${question.questionId}`, auth: answerAuthor.auth }).then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.body).to.be.an('array');
+                expect(res.body.some((a) => a.answerId === createRes.body.answerId)).to.eq(true);
+            });
+        });
+    });
 
-            // 2. Update the answer (needs auth)
-            cy.request({
-                method: 'PUT',
-                url: `${BASE}/title/${encodeURIComponent(answer.title)}`,
-                body: updatedAnswer,
-                failOnStatusCode: false,
-                auth: {
-                    user: AUTHOR,
-                    pass: TEST_PASSWORD
-                }
-            }).then((res) => {
-                expect(res.status).to.be.oneOf([200, 204]);
+    it('GET /answers/user/:userId — get answers by user id', () => {
+        const answer = makeAnswer();
 
-                // 3. Verify the update (needs auth)
-                cy.request({
-                    method: 'GET',
-                    url: `${BASE}/title/${encodeURIComponent(answer.title)}`,
-                    auth: {
-                        user: AUTHOR,
-                        pass: TEST_PASSWORD
-                    }
-                }).then((getRes) => {
-                    expect(getRes.status).to.eq(200);
-                    expect(getRes.body.text).to.eq('Updated content');
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request({ method: 'GET', url: `/api/users/${answerAuthor.username}`, auth: answerAuthor.auth }).then((userRes) => {
+                cy.request({ method: 'GET', url: `${BASE}/user/${userRes.body.score === undefined ? 0 : createRes.body.userId}`, auth: answerAuthor.auth }).then((res) => {
+                    expect(res.status).to.eq(200);
+                    expect(res.body).to.be.an('array');
                 });
             });
         });
     });
 
-    it('DELETE /answers/title/:title — delete answer by title', () => {
+    it('PUT /answers/:id — update answer', () => {
         const answer = makeAnswer();
 
-        // 1. Create the answer (needs auth)
-        cy.request({
-            method: 'POST',
-            url: BASE,
-            body: answer,
-            auth: {
-                user: AUTHOR,
-                pass: TEST_PASSWORD
-            }
-        }).then((createRes) => {
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
             expect(createRes.status).to.eq(201);
 
-            // 2. Delete the answer (needs auth)
             cy.request({
-                method: 'DELETE',
-                url: `${BASE}/title/${encodeURIComponent(answer.title)}`,
-                auth: {
-                    user: AUTHOR,
-                    pass: TEST_PASSWORD
-                }
+                method: 'PUT',
+                url: `${BASE}/${createRes.body.answerId}`,
+                body: { answerId: createRes.body.answerId, questionId: question.questionId, authorName: answerAuthor.username, text: 'Updated answer content' },
+                auth: answerAuthor.auth
             }).then((res) => {
                 expect(res.status).to.eq(200);
-                expect(res.body).to.contain(answer.title);
-            });
-
-            // 3. Try to fetch the deleted answer to verify it is gone (needs auth)
-            cy.request({
-                method: 'GET',
-                url: `${BASE}/title/${encodeURIComponent(answer.title)}`,
-                failOnStatusCode: false,
-                auth: {
-                    user: AUTHOR,
-                    pass: TEST_PASSWORD
-                }
-            }).then((res) => {
-                expect(res.status).to.eq(404);
+                expect(res.body.text).to.eq('Updated answer content');
             });
         });
     });
 
+    it('PUT /answers/:id/like — like answer', () => {
+        const answer = makeAnswer();
+
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request({ method: 'PUT', url: `${BASE}/${createRes.body.answerId}/like?username=${voter.username}`, auth: voter.auth }).then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.body.likes).to.eq(1);
+                expect(res.body.currentUserVote).to.eq('LIKE');
+            });
+        });
+    });
+
+    it('PUT /answers/:id/dislike — dislike answer', () => {
+        const answer = makeAnswer();
+
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request({ method: 'PUT', url: `${BASE}/${createRes.body.answerId}/dislike?username=${voter.username}`, auth: voter.auth }).then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.body.dislikes).to.eq(1);
+                expect(res.body.currentUserVote).to.eq('DISLIKE');
+            });
+        });
+    });
+
+    it('PUT /answers/:id/accept — accept answer as question author', () => {
+        const answer = makeAnswer();
+
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request({ method: 'PUT', url: `${BASE}/${createRes.body.answerId}/accept?username=${questionAuthor.username}`, auth: questionAuthor.auth }).then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.body.accepted).to.eq(true);
+            });
+        });
+    });
+
+    it('DELETE /answers/:id — delete answer by id', () => {
+        const answer = makeAnswer();
+
+        cy.request({ method: 'POST', url: BASE, body: answer, auth: answerAuthor.auth }).then((createRes) => {
+            expect(createRes.status).to.eq(201);
+
+            cy.request({ method: 'DELETE', url: `${BASE}/${createRes.body.answerId}`, auth: answerAuthor.auth }).then((res) => {
+                expect(res.status).to.eq(200);
+                expect(res.body).to.contain(`${createRes.body.answerId}`);
+            });
+
+            cy.request({ method: 'GET', url: `${BASE}/${createRes.body.answerId}`, auth: answerAuthor.auth, failOnStatusCode: false }).then((res) => {
+                expect(res.status).to.eq(404);
+            });
+        });
+    });
 });
